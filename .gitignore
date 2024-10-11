@@ -134,3 +134,11 @@ cython_debug/
 
 # file resources
 hidden.py
+
+# Experiments
+scratch.py
+scratch.ipynb
+ignore/
+
+# hide actual image data.. better to extract locally
+#data/Indian Food Images/
