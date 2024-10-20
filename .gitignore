@@ -139,6 +139,7 @@ hidden.py
 scratch.py
 scratch.ipynb
 ignore/
+delete/
 
 # hide actual image data.. better to extract locally
 #data/Indian Food Images/
