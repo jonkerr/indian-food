@@ -22,8 +22,10 @@ def get_img_df(path):
     # create df and melt to have the column names (labels) in same row as image path
     # apply a neat trick for dictionaries of unequal lengths
     # https://stackoverflow.com/questions/19736080/creating-dataframe-from-a-dictionary-where-entries-have-different-lengths
-    return pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in image_dct.items() ])).melt()\
+    df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in image_dct.items() ])).melt()\
         .dropna().rename(columns={'variable':'label', 'value':'path'})
+        
+    return df
 
 
 def split(df, test_size):
@@ -41,6 +43,4 @@ def train_val_test_split(df, test_size=0.2, val_size=0.2):
     test_size_c = test_size / (test_size+val_size)
     # split
     test, validate = split(test_validate, test_size_c)
-    return train, test, validate
-
-
+    return train, validate, test
