@@ -44,3 +44,12 @@ def train_val_test_split(df, test_size=0.2, val_size=0.2):
     # split
     test, validate = split(test_validate, test_size_c)
     return train, validate, test
+
+
+def get_split_data(path="data/Food_Classification/"):
+    # get images as paths
+    df = get_img_df(path)
+    
+    # split
+    train, validate, test = train_val_test_split(df, test_size=0.2, val_size=0.2)
+    return train, validate, test

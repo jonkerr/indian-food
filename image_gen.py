@@ -45,6 +45,7 @@ def get_gen_from_df(df, target_size=(224, 224), batch_size=32, train=True):
         class_mode='categorical'  
     )    
 
+""" This doesn't work.  Leaving in for now in case I want to give another chance but will likely be deleted at some point.
 def get_gen_from_prefetch(train_ds):
 
     # use pre-defined params
@@ -59,4 +60,4 @@ def get_gen_from_prefetch(train_ds):
     # Add prefetching
     dataset = dataset.prefetch(tf.data.AUTOTUNE)
     return dataset
-    
+"""
