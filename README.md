@@ -3,7 +3,15 @@
 2. Based on derived label, recommend recipes and similar dishes
 
 #### Setup
-Create a python (3.12.0) virtual environment based on requirements.txt
+Install environment from conda file
+```
+conda env create -f environment.yml
+```
+
+Then activate
+```
+conda activate Tasty_AI
+```
 
 #### Data Sources
 * Indian_Food_Images : https://www.kaggle.com/code/harshghadiya/transfer-learning-models/input
