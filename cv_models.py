@@ -7,7 +7,7 @@ Generalize architecture and simplify
 from image_prep import get_split_data
 from image_gen import get_gen_from_df
 
-import tensorflow as tf 
+#import tensorflow as tf 
 import keras
 from keras.applications import Xception, VGG16, ResNet152V2, InceptionResNetV2, NASNetLarge, EfficientNetB4, EfficientNetB5, EfficientNetB6, EfficientNetB7
 from keras.layers import Flatten, Dense, Dropout, BatchNormalization, Input
@@ -60,17 +60,17 @@ IMG_SIZE = (224, 224)  # VGG16 default image size
 input_tensor_shape = Input(shape=(IMG_SIZE[0], IMG_SIZE[1], 3))
 
 # Select some candidate models with a high top-5 accuracy
-base_models = [
-    Xception(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
-    VGG16(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
-    ResNet152V2(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
-    InceptionResNetV2(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
-    NASNetLarge(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
-    EfficientNetB4(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
-    EfficientNetB5(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
-    EfficientNetB6(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
-    EfficientNetB7(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
-]
+base_models = {    
+    'Xception' : Xception(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
+    'VGG16' : VGG16(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
+    'ResNet152V2': ResNet152V2(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
+    'InceptionResNetV2': InceptionResNetV2(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
+    'NASNetLarge': NASNetLarge(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
+    'EfficientNetB4': EfficientNetB4(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
+    'EfficientNetB5':EfficientNetB5(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
+    'EfficientNetB6':EfficientNetB6(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
+    'EfficientNetB7':EfficientNetB7(weights='imagenet', include_top=False, input_tensor=input_tensor_shape),
+}
 
 dropout_vals = [0.2, 0.3, 0.4, 0.5]
 
@@ -78,28 +78,51 @@ dropout_vals = [0.2, 0.3, 0.4, 0.5]
 Helper methods
 """
 
-def get_training_data():
-    train, validate, test = get_split_data()
-
-    train_gen = get_gen_from_df(train)
-    validate_gen = get_gen_from_df(validate, train=False)
+def get_training_data(df_train, df_validate):
+    train_gen = get_gen_from_df(df_train)
+    validate_gen = get_gen_from_df(df_validate, train=False)
     
     # not sure what to do with test data yet so just handle train/test for now
     return train_gen, validate_gen
 
 
-
-def train_transfer_model(base_model, epochs=10, num_classes=80, hidden_size=4096, dropout=0.2):
+def train_transfer_model(base_model, df_train, df_validate, epochs=10, num_classes=20, hidden_size=4096, dropout=0.2):
+    # create generators from DFs to ensure same starting place
+    train_gen, validate_gen = get_training_data(df_train, df_validate)
     
-    train_gen, validate_gen = get_training_data()
-        
+    # create model
     model = TastyModel(base_model, dropout=dropout, num_classes=num_classes, hidden_size=hidden_size)
     model.compile(optimizer=Adam(learning_rate=1e-5), loss='categorical_crossentropy', metrics=['accuracy'])
 
     # Train model
     history = model.fit(train_gen, validation_data=validate_gen, epochs=epochs, steps_per_epoch=train_gen.num_batches)
-    
     val_loss, val_accuracy = model.evaluate(validate_gen)
     print(f'Validation accuracy: {val_accuracy * 100:.2f}%')
-
     return history, model, val_loss, val_accuracy
+
+
+def find_best_model(epochs=10):
+    best_acc = 0
+    best_model_name = None
+    best_dropout = 0
+    
+    all_results = {}    
+    
+    # split once to ensure all models are using the same splits (and ensure nobody is using data in df_test for training, to prevent leakage)
+    df_train, df_validate, df_test = get_split_data()
+    
+    for model_name, base_model in base_models.items():
+        for dropout in dropout_vals:
+            vals = f'{model_name}_{dropout}' 
+            print(f'** Training: {vals}')
+
+            history, model, val_loss, val_accuracy = train_transfer_model(base_model, df_train, df_validate, epochs=epochs, dropout=dropout)            
+            all_results[vals] = (history, model, val_loss, val_accuracy)
+            
+            if val_accuracy > best_acc:
+                best_acc = val_accuracy
+                best_model_name = model_name
+                best_dropout = dropout
+                
+    return best_acc, best_model_name, best_dropout, all_results
+                
