@@ -12,7 +12,7 @@ import keras
 from keras.applications import Xception, VGG16, ResNet152V2, InceptionResNetV2, NASNetLarge, EfficientNetB4, EfficientNetB5, EfficientNetB6, EfficientNetB7
 from keras.layers import Flatten, Dense, Dropout, BatchNormalization, Input
 #from keras.models import Model
-#from keras.optimizers import Adam
+from keras.optimizers import Adam
 
 
 class TastyModel(keras.Model):
@@ -89,4 +89,17 @@ def get_training_data():
 
 
 
+def train_transfer_model(base_model, epochs=10, num_classes=80, hidden_size=4096, dropout=0.2):
     
+    train_gen, validate_gen = get_training_data()
+        
+    model = TastyModel(base_model, dropout=dropout, num_classes=num_classes, hidden_size=hidden_size)
+    model.compile(optimizer=Adam(learning_rate=1e-5), loss='categorical_crossentropy', metrics=['accuracy'])
+
+    # Train model
+    history = model.fit(train_gen, validation_data=validate_gen, epochs=epochs, steps_per_epoch=train_gen.num_batches)
+    
+    val_loss, val_accuracy = model.evaluate(validate_gen)
+    print(f'Validation accuracy: {val_accuracy * 100:.2f}%')
+
+    return history, model, val_loss, val_accuracy
