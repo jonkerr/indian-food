@@ -4,6 +4,12 @@ from sklearn.model_selection import train_test_split
 
 RANDOM_STATE = 42
 
+def clean_df(df):
+    """
+    Insert cleaning code here
+    """
+    return df
+
 def get_img_df(path):
     """
     List the images under each folder and append the path onto each image name
@@ -25,7 +31,7 @@ def get_img_df(path):
     df = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in image_dct.items() ])).melt()\
         .dropna().rename(columns={'variable':'label', 'value':'path'})
         
-    return df
+    return clean_df(df)
 
 
 def split(df, test_size):
