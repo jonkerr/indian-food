@@ -143,3 +143,6 @@ delete/
 
 # hide image cache
 image_df.pkl.xz
+
+# scratch
+image_data_prep_idf.ipynb
