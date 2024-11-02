@@ -141,5 +141,5 @@ scratch.ipynb
 ignore/
 delete/
 
-# hide actual image data.. better to extract locally
-#data/Indian Food Images/
+# hide image cache
+image_df.pkl.xz
