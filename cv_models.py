@@ -244,3 +244,30 @@ def find_best_model(epochs=10, batch_size=32):
                     print(f"Best Accuracy: {best_acc}")
                     print(f"Best validation set: {vals}")
                 yield best_acc, best_model_name, best_dropout, best_hidden, all_results
+
+
+
+def predict(path_to_image, top=3):
+    import keras
+    import cv2
+    import numpy as np
+    
+    import os
+    labels = os.listdir('data/Food_Classification/')
+
+    model_path = 'models/cv_model.keras'
+    model = keras.models.load_model(model_path)
+
+    # reshape image
+    image = cv2.imread(path_to_image)
+    image = cv2.resize(image,(224,224))
+    image = np.reshape(image,[1,224,224,3])
+    
+    preds_out = model.predict(image) 
+    softmax = keras.layers.Softmax()
+    sm_preds = softmax(preds_out)[0]
+
+    idx = np.argsort(sm_preds)[::-1]
+
+    return [labels[i] for i in idx[:top]]   
+
