@@ -78,7 +78,7 @@ def split(df, test_size):
     return train_test_split(df, test_size=test_size, random_state=RANDOM_STATE, stratify=df['label'])
 
 
-def train_val_test_split(df, test_size=0.2, val_size=0.2):    
+def train_val_test_split(df, test_size=0.1, val_size=0.1):    
     # test validate size will be the combination of those two values
     test_size_c = test_size+val_size    
     # split
@@ -96,5 +96,5 @@ def get_split_data(path="data/Food_Classification/"):
     df = get_img_df(path)
     
     # split
-    train, validate, test = train_val_test_split(df, test_size=0.2, val_size=0.2)
+    train, validate, test = train_val_test_split(df, test_size=0.1, val_size=0.1)
     return train, validate, test

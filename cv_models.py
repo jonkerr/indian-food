@@ -74,7 +74,8 @@ def get_tasty_model(base_model, num_classes=80, hidden_size=1024, dropout=0.2):
     # outputs: `(inputs * scale) + offset`
     scale_layer = keras.layers.Rescaling(scale=1 / 127.5, offset=-1)
     x = scale_layer(inputs)
-
+    
+    """
     # The base model contains batchnorm layers. We want to keep them in inference mode
     # when we unfreeze the base model for fine-tuning, so we make sure that the
     # base_model is running in inference mode here.
@@ -83,6 +84,28 @@ def get_tasty_model(base_model, num_classes=80, hidden_size=1024, dropout=0.2):
     x = keras.layers.Dropout(dropout)(x)  # Regularize with dropout
     outputs = keras.layers.Dense(num_classes)(x)
     return keras.Model(inputs, outputs)
+    """
+    
+    from tensorflow.keras.models import Model
+
+    # Freeze the layers of the base model
+    for layer in base_model.layers:
+        layer.trainable = False
+
+    #  Architecture from https://www.kaggle.com/code/varsha300/transferlearning
+    #    x = base_model (x, training=False)
+    x = base_model.output
+    x = Flatten()(x)
+    x = Dense(hidden_size, activation='relu')(x)
+    x = Dropout(dropout)(x)
+    x = BatchNormalization()(x)
+    x = Dense(hidden_size, activation='relu')(x)
+    x = Dropout(dropout)(x)
+    predictions = Dense(num_classes, activation='softmax')(x)
+    
+    # This is the model we will train
+    
+    return Model(inputs=base_model.input, outputs=predictions)
 
 
 
@@ -174,7 +197,9 @@ def train_transfer_model(base_model, df_train, df_validate, epochs=10, num_class
     return history, model, val_loss, val_accuracy
 
 
-def train_transfer_model_2(base_model, df_train, df_validate, epochs=10, num_classes=20, hidden_size=1024, dropout=0.2, batch_size=32, bulk_train=False, lr=0.001):
+def train_transfer_model_2(base_model, df_train, df_validate, epochs=10, num_classes=20, hidden_size=1024, dropout=0.2, batch_size=32, bulk_train=False, lr=1e-4, num_reductions=2):
+    from keras import backend as K
+    
     # create generators from DFs to ensure same starting place
     train_gen, validate_gen = get_training_data(
         df_train, df_validate, batch_size)
@@ -185,9 +210,55 @@ def train_transfer_model_2(base_model, df_train, df_validate, epochs=10, num_cla
     model = get_tasty_model(base_model, num_classes=num_classes, hidden_size=hidden_size, dropout=dropout)    
     model.compile(optimizer=Adam(learning_rate=lr),
                   loss='categorical_crossentropy', metrics=['accuracy'])
+    
+    
+    """    class EpocCounterCallback(keras.callbacks.Callback):
+        def __init__(self):
+            self.current_counter = 0
+            self.previous_epochs = 0
+        
+        def on_epoch_end(self, epoch, logs=None):
+            self.current_counter = epoch
+            
+        def next_run(self):
+            self.previous_epochs = self.current_counter
+            self.current_counter = 0
+        
+    
+    counter = EpocCounterCallback()"""
+    
+    # early stopping
+#    callback = keras.callbacks.EarlyStopping(monitor='loss', patience=3)
+    reduce_lr=keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.1, patience=3, verbose=1, mode='auto', min_delta=0.0001, cooldown=0, min_lr=1e-6)
+        
     # Train model
     history = model.fit(train_gen, validation_data=validate_gen, epochs=epochs,
-                        steps_per_epoch=steps_per_epoch, validation_steps=validation_steps)
+                        steps_per_epoch=steps_per_epoch, validation_steps=validation_steps, callbacks=[reduce_lr])
+    
+
+    """
+    num_epocs = len(list(history.history.values())[0])
+    print(f'LR {lr} converged after {num_epocs} epochs')
+
+    # iterate over smaller learning rates
+    # https://stackoverflow.com/questions/59737875/keras-change-learning-rate
+    prev_epocs = num_epocs
+    iter_lr = lr
+    for _ in range(num_reductions):
+        counter.next_run()
+        iter_lr = iter_lr / 10    
+        # Change learning rate to 0.001 and train for x more epochs
+        K.set_value(model.optimizer.learning_rate, iter_lr)
+        
+        history = model.fit(train_gen, validation_data=validate_gen, epochs=epochs, initial_epoch=counter.previous_epochs,
+                            steps_per_epoch=steps_per_epoch, validation_steps=validation_steps, callbacks=[callback, counter])
+        histories.append(history)
+
+        num_epocs = len(list(history.history.values())[0])
+        print(f'LR {lr} converged after {num_epocs} additional epochs')
+        prev_epocs += num_epocs
+    """
+    
     val_loss, val_accuracy = model.evaluate(validate_gen)
     
     # free up memory
@@ -254,6 +325,7 @@ def predict(path_to_image, top=3):
     
     import os
     labels = os.listdir('data/Food_Classification/')
+    labels = [l for l in labels if not l.endswith('xz')]
 
     model_path = 'models/cv_model.keras'
     model = keras.models.load_model(model_path)
