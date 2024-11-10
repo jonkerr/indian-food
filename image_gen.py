@@ -5,21 +5,25 @@ def get_basic_image_generator():
     datagen = ImageDataGenerator(rescale=1./255)    
     return datagen
 
-def get_image_generator():
-    # abstract the params used in image generation
+def train_image_generator():
+    """
+    Abstract the params used in image generation
+    """
     datagen = ImageDataGenerator(
         rescale=1./255,        
-        rotation_range=20, 
-        zoom_range=0.15, 
+        rotation_range=40, 
+        zoom_range=0.2, 
         width_shift_range=0.2, 
         height_shift_range=0.2, 
-        shear_range=0.15, 
+        shear_range=0.2, 
 #        brightness_range=0.1,
         horizontal_flip=True, 
         vertical_flip=True,
         fill_mode="nearest",
         channel_shift_range=0.1,
     )    
+    
+    return ImageDataGenerator(rotation_range=20, zoom_range=0.15, width_shift_range=0.2, height_shift_range=0.2, shear_range=0.15, horizontal_flip=True, fill_mode="nearest")
     return datagen
     
 

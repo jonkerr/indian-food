@@ -146,3 +146,6 @@ image_df.pkl.xz
 
 # scratch
 image_data_prep_idf.ipynb
+
+# model is too big to push to git
+*.keras
