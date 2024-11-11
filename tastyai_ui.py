@@ -14,6 +14,9 @@ import tempfile
 cuisine_df = pd.read_pickle("data/nohindi_recipes.pkl")
 recom_df = pd.read_pickle("data/processed_recipes.pkl")
 
+# # Load the pre-trained model
+tasty_model = TastyFoodPredictor()
+
 # print(recom_df.columns)
 
 # Define path for recipe images and model for indentifying dish name from image
@@ -50,9 +53,6 @@ if uploaded_image is not None:
 
     # Button to identify dish name using the pre-trained model
     if st.button("Identify Dish Name"):
-        # # Load the pre-trained model
-        # model = tf.keras.models.load_model(model_path)
-        tasty_model = TastyFoodPredictor()
 
         # Save the uploaded image as a temporary file
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as temp_image_file:
