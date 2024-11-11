@@ -3,8 +3,9 @@ from PIL import Image
 import pandas as pd
 import os
 import tensorflow as tf
-# from topic_modeling_NMF import get_recommendations  # Import get_recommendations from the script
-# from topic_modeling_NMF import filter_recipes 
+import numpy as np
+from cv_predict import TastyFoodPredictor
+import tempfile
 
 # # Import get_recommendations from topic_modeling_NMF
 # from topic_modeling_NMF import get_recommendations
@@ -17,7 +18,8 @@ recom_df = pd.read_pickle("data/processed_recipes.pkl")
 
 # Define path for recipe images and model for indentifying dish name from image
 recipe_images_path = "data/indian_food_images/" 
-model_path = "data/InceptionResNetV2_4096_2048_84.81.keras"
+# model_path = "data/efficientnet_v2_20_84.64.keras"
+
 
 # # Allergy options for checkboxes
 allergy_options = recom_df['categorized_prep_time'].unique()
@@ -48,24 +50,26 @@ if uploaded_image is not None:
 
     # Button to identify dish name using the pre-trained model
     if st.button("Identify Dish Name"):
-        # Load the pre-trained model
-        model = tf.keras.models.load_model(model_path)
+        # # Load the pre-trained model
+        # model = tf.keras.models.load_model(model_path)
+        tasty_model = TastyFoodPredictor()
 
-        # Preprocess the image for the model
-        def preprocess_image(image, target_size=(299, 299)):
-            image = image.resize(target_size)
-            image_array = np.array(image) / 255.0  # Normalize to [0, 1]
-            return np.expand_dims(image_array, axis=0)  # Add batch dimension
+        # Save the uploaded image as a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as temp_image_file:
+            temp_image_path = temp_image_file.name
+            image.save(temp_image_path)
 
-        processed_image = preprocess_image(image)
-
-        # Predict the dish name
-        predictions = model.predict(processed_image)
-        predicted_index = np.argmax(predictions[0])  # Get the index of the highest score
-        predicted_dish_name = cuisine_df["name"].unique()[predicted_index]  # Map index to dish name
-
-        # Display the identified dish name
-        st.success(f"Identified Dish Name: {predicted_dish_name}")
+        try:
+            # Predict the dish name using the path to the temporary image
+            predicted_dish_name = tasty_model.predict(temp_image_path)
+            
+            # Display the identified dish name
+            st.success(f"Identified Dish Name: {predicted_dish_name}")
+        
+        finally:
+            # Clean up by deleting the temporary file
+            if os.path.exists(temp_image_path):
+                os.remove(temp_image_path)
 
         # Optional: Automatically select the identified dish name in the dropdown
         selected_recipe = predicted_dish_name
