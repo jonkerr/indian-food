@@ -7,9 +7,6 @@ import numpy as np
 from cv_predict import TastyFoodPredictor
 import tempfile
 
-# # Import get_recommendations from topic_modeling_NMF
-# from topic_modeling_NMF import get_recommendations
-
 # Load DataFrames from pickle files
 cuisine_df = pd.read_pickle("data/nohindi_recipes.pkl")
 recom_df = pd.read_pickle("data/processed_recipes.pkl")
@@ -43,6 +40,14 @@ allergen_options = sorted(allergen_options)
 st.title("TastyAI: Indian Recipe Recommendation System")
 st.write("Upload an image of a dish or select dish name from the given list, select Cuisine, select course, select diet type, select preparation time, and select any allergy information for recommendations.")
 
+
+# Initialize session state for identified dish name and prediction status
+if 'predicted_dish_name' not in st.session_state:
+    predicted_dish_name = None
+    st.session_state['predicted_dish_name'] = "Select an option"
+if 'prediction_done' not in st.session_state:
+    st.session_state['prediction_done'] = False
+
 # 1. Image Upload (Optional)
 uploaded_image = st.file_uploader("Upload an Image (optional)", type=["jpg", "jpeg", "png"])
 
@@ -61,92 +66,95 @@ if uploaded_image is not None:
 
         try:
             # Predict the dish name using the path to the temporary image
-            predicted_dish_name = tasty_model.predict(temp_image_path)
-            
-            # Display the identified dish name
-            st.success(f"Identified Dish Name: {predicted_dish_name}")
+            st.session_state['predicted_dish_name'] = tasty_model.predict(temp_image_path)
+            st.session_state['prediction_done'] = True
+            st.success(f"Predicted Dish Name: {st.session_state['predicted_dish_name']}")
         
         finally:
             # Clean up by deleting the temporary file
             if os.path.exists(temp_image_path):
                 os.remove(temp_image_path)
 
-        # Optional: Automatically select the identified dish name in the dropdown
-        selected_recipe = predicted_dish_name
-
 # 2. Dish name Selection Dropdown
-selected_recipe = st.selectbox("Select a dish name", cuisine_df["name"].unique())
+# Create options list for "Select a dish name" dropdown with placeholder
+dish_options = ["Select an option"] + list(cuisine_df["name"].unique())
+# Set the index to the identified dish name if available, otherwise default to the first option
+if st.session_state['predicted_dish_name'] in dish_options:
+    selected_dish_index = dish_options.index(st.session_state['predicted_dish_name'])
+else:
+    selected_dish_index = 0
 
-# 3. Cuisine name Selection Dropdown
-selected_cuisine = st.selectbox("Select a Cuisine (optional)", cuisine_df["cuisine"].unique())
+selected_recipe = st.selectbox("Select a dish name", dish_options, index=selected_dish_index)
 
-# 4. Course name Selection Dropdown
-selected_course = st.selectbox("Select a Course (optional)", cuisine_df["course"].unique())
+# 3. Cuisine name Selection Dropdown with placeholder
+selected_cuisine = st.selectbox("Select a Cuisine (optional)", ["Select an option"] + list(cuisine_df["cuisine"].unique()))
 
-# 5. Diet Type Selection Dropdown
-selected_diet_type = st.selectbox("Select a Diet Type (optional)", cuisine_df["diet"].unique())
+# 4. Course name Selection Dropdown with placeholder
+selected_course = st.selectbox("Select a Course (optional)", ["Select an option"] + list(cuisine_df["course"].unique()))
 
-# 6. Preparation Time Selection Dropdown
-selected_prep_time = st.selectbox("Select preparation time (optional)", allergy_options)
+# 5. Diet Type Selection Dropdown with placeholder
+selected_diet_type = st.selectbox("Select a Diet Type (optional)", ["Select an option"] + list(cuisine_df["diet"].unique()))
 
-# 7. Allergy Information Checkboxes (Optional)
+# 6. Preparation Time Selection Dropdown with placeholder
+selected_prep_time = st.selectbox("Select preparation time (optional)", ["Select an option"] + list(allergy_options))
+
 # 7. Allergy Information Checkboxes (Optional)
 st.write("Select any allergy information (optional):")
 selected_allergies = st.multiselect("Allergy Information", allergen_options)
 
-# # Button to get recommendations
-# if st.button("Find Recipe"):
-#     # Check if either an image or a recipe is provided
-#     if uploaded_image is None and not selected_recipe:
-#         st.error("Please upload an image or select a recipe from the dropdown.")
-#     else:
-#         st.write("Fetching recommendations based on your input...")
+# Button to get recommendations
+if st.button("Find Recipe"):
+    # Check if either an image or a recipe is provided
+    if uploaded_image is None and not selected_recipe:
+        st.error("Please upload an image or select a recipe from the dropdown.")
+    else:
+        st.write("Fetching recommendations based on your input...")
 
-#         # Apply filtering based on user preferences
-#         filtered_df = filter_recipes(
-#             recom_df,
-#             cuisine=selected_cuisine,
-#             course=selected_course,
-#             diet=selected_diet_type,
-#             prep_time=selected_prep_time,
-#             allergen_type=selected_allergies
-#         )
+        # Apply filtering based on user preferences
+        filtered_df = filter_recipes(
+            recom_df,
+            cuisine=selected_cuisine,
+            course=selected_course,
+            diet=selected_diet_type,
+            prep_time=selected_prep_time,
+            allergen_type=selected_allergies
+        )
 
-#         # Check if the filtered DataFrame is empty
-#         if filtered_df.empty:
-#             st.write("No recipes match your filters.")
-#         else:
-#             # Calculate topic matrix for the filtered DataFrame
-#             topic_matrix = np.array(filtered_df["topic_vector"].tolist())
+        # Check if the filtered DataFrame is empty
+        if filtered_df.empty:
+            st.write("No recipes match your filters.")
+        else:
+            # Calculate topic matrix for the filtered DataFrame
+            topic_matrix = np.array(filtered_df["topic_vector"].tolist())
 
-#             # Call get_recommendations with the selected dish name and filtered DataFrame
-#             recommended_recipes = get_recommendations(
-#                 dish_name=selected_recipe,
-#                 df=filtered_df,
-#                 topic_matrix=topic_matrix,
-#                 num_recommendations=5
-#             )
+            # Call get_recommendations with the selected dish name and filtered DataFrame
+            recommended_recipes = get_recommendations(
+                dish_name=selected_recipe,
+                df=filtered_df,
+                topic_matrix=topic_matrix,
+                num_recommendations=5
+            )
 
-#             # Display the recommended recipes
-#             if recommended_recipes is not None:
-#                 st.write("Recommended Recipes:")
-#                 for _, row in recommended_recipes.iterrows():
-#                     st.subheader(row['name'])
+            # Display the recommended recipes
+            if recommended_recipes is not None:
+                st.write("Recommended Recipes:")
+                for _, row in recommended_recipes.iterrows():
+                    st.subheader(row['name'])
 
-#                     # Check for an image file corresponding to the recipe name
-#                     image_path = os.path.join(recipe_images_path, f"{row['name']}.jpg")
-#                     if os.path.exists(image_path):
-#                         recipe_image = Image.open(image_path)
-#                         st.image(recipe_image, caption=row['name'], use_column_width=True)
+                    # Check for an image file corresponding to the recipe name
+                    image_path = os.path.join(recipe_images_path, f"{row['name']}.jpg")
+                    if os.path.exists(image_path):
+                        recipe_image = Image.open(image_path)
+                        st.image(recipe_image, caption=row['name'], use_column_width=True)
 
-#                     # Show additional details if available
-#                     st.write(f"Cuisine: {row['cuisine']}")
-#                     st.write(f"Course: {row['course']}")
-#                     st.write(f"Diet Type: {row['diet']}")
-#                     st.write(f"Preparation Time: {row['prep_time']}")
-#                     st.write(f"Ingredients: {row['cleaned_ingredients']}")
-#                     st.write("Allergens:", row['allergens'])
-#                     st.write("")
+                    # Show additional details if available
+                    st.write(f"Cuisine: {row['cuisine']}")
+                    st.write(f"Course: {row['course']}")
+                    st.write(f"Diet Type: {row['diet']}")
+                    st.write(f"Preparation Time: {row['prep_time']}")
+                    st.write(f"Ingredients: {row['cleaned_ingredients']}")
+                    st.write("Allergens:", row['allergens'])
+                    st.write("")
 
-#             else:
-#                 st.write("No recommendations available based on the selected options.")
+            else:
+                st.write("No recommendations available based on the selected options.")
