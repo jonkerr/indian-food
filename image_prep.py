@@ -12,7 +12,7 @@ from scipy.stats import zscore
 IMG_SIZE = (224, 224)  
 RANDOM_STATE = 42
 
-DEBUG = True
+DEBUG = False
 def print_debug(*args, **kwargs):
     if DEBUG:
         print(*args, **kwargs)
@@ -215,4 +215,4 @@ def get_split_data(preprocess_input, model_name, image_path='data/Food_Classific
     # stratified split on label
     print_debug('train_val_test_split')    
     X_train, y_train, X_test, y_test, X_validate, y_validate = train_val_test_split(X, y, labels, test_size=0.1, val_size=0.1)
-    return X_train, y_train, X_test, y_test, X_validate, y_validate
+    return X_train, y_train, X_test, y_test, X_validate, y_validate, encoder

@@ -13,7 +13,7 @@ Got a fair amount of inspiration for the base approach from:  https://www.kaggle
 but have adapted a number of things to make it easier to alter different aspects 
 """
 
-DEBUG = True
+DEBUG = False
 def print_debug(*args, **kwargs):
     if DEBUG:
         print(*args, **kwargs)
@@ -58,7 +58,7 @@ def get_tasty_model(base_model, num_classes):
     x = Dense(4096, activation='relu')(x)
     x = Dropout(0.5)(x)
     x = BatchNormalization()(x)
-    x = Dense(2048, activation='relu')(x)
+    x = Dense(1024, activation='relu')(x)
     x = Dropout(0.5)(x)
     predictions = Dense(num_classes, activation='softmax')(x)
     return Model(inputs=base_model.input, outputs=predictions)    
@@ -102,7 +102,7 @@ def training_harness(batch_size=32, epochs=20, verbose=1):
     # get data
     print_debug('Getting data')
     mapping_dct = get_label_mapping()
-    X_train, y_train, X_test, y_test, X_val, y_val = get_split_data(preprocess_input, model_name)
+    X_train, y_train, X_test, y_test, X_val, y_val, label_encoder = get_split_data(preprocess_input, model_name)
     print_debug(f'X_train shape: {X_train.shape}')
     print_debug(f'y_train shape: {y_train.shape}')
     print_debug(f'X_val shape: {X_val.shape}')
@@ -119,8 +119,8 @@ def training_harness(batch_size=32, epochs=20, verbose=1):
     print_debug(f'Training for {epochs} epochs')    
     trained_model, history, val_loss, val_accuracy = train_model(tasty_model, X_train, y_train, X_val, y_val, batch_size, epochs, verbose)
     
-    path = f'models/{model_name}_{epochs}_{val_accuracy * 100:.2f}.keras'
+    path = f'models/L3_{model_name}_{epochs}_{val_accuracy * 100:.2f}.keras'
     trained_model.save(path)
     
-    return history, val_loss, val_accuracy
+    return trained_model, history, val_loss, val_accuracy, label_encoder
     
