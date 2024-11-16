@@ -1,3 +1,7 @@
+# Force CPU only for predictions
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 import keras
 import cv2
 import numpy as np
@@ -33,3 +37,25 @@ class TastyFoodPredictor():
         # map to label
         idx = np.argmax(preds_out[0])
         return self.mapping_dct[idx]
+    
+    
+def health_check():       
+    print('starting health check')
+    test_image = 'data/Food_Classification/chole_bhature/002.jpg'
+    # confirm key files exist
+    import os
+    import sys
+    
+    if os.path.exists(test_image):
+        print('found test image')
+    else:
+        print('error importing image')
+        sys.exit()
+        
+    model = TastyFoodPredictor()
+    pred = model.predict(test_image)
+    print(f'Predicted: {pred}')
+    
+
+if __name__ == "__main__":
+    health_check()
