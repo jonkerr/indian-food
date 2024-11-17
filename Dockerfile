@@ -15,7 +15,7 @@ RUN pip install scikit-learn==1.5.1
 RUN pip install nltk==3.9.1 gensim==4.3.3 
 RUN pip install tensorflow==2.10.0 
 RUN pip install opencv-python==4.10.0.84
-RUN pip install streamlit==1.12.0
+RUN pip install streamlit==1.9.0
 
 # Add source data
 RUN mkdir -p ./data/pre_processed/
@@ -35,11 +35,15 @@ ADD models/efficientnet_v2_20_84.64.keras ./models/
 ADD image_prep.py .
 ADD cv_predict.py .
 
+#Add recommender models .
+ADD recommendation_models.py .
+
 # We don't have the version for headless so install last as
 RUN pip install opencv-python-headless
 
 # Add UI (most likely to change)
 ADD tastyai_ui.py .
 
-CMD ["python", "cv_predict.py"]
-#CMD ["streamlit", "run", "tastyai_ui.py"]
+EXPOSE 8501
+
+CMD ["streamlit", "run", "tastyai_ui.py"]
