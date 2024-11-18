@@ -5,7 +5,8 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.metrics import mean_squared_error
+from gensim.corpora import Dictionary
+from gensim.models.coherencemodel import CoherenceModel
 
 
 processed_df = pd.read_pickle("data/processed_recipes.pkl")
@@ -16,9 +17,6 @@ def find_filter_recipes (dish_name, df, ingredients=None, cuisine=None, course=N
     filtered_df = df[df['name'].str.contains(dish_name, case=False, na=False)]
     print ((f"Number of found dishes before filtering : {filtered_df.shape[0]}"))
 
-    if ingredients:
-        # Check if all specified ingredients are present in the cleaned_ingredients list
-        filtered_df = filtered_df[filtered_df['cleaned_ingredients'].apply(lambda x: all(ing in x for ing in ingredients))]            
     if cuisine:
         filtered_df = filtered_df[filtered_df['cuisine'] == cuisine]
     if course:
@@ -37,40 +35,54 @@ def find_filter_recipes (dish_name, df, ingredients=None, cuisine=None, course=N
     return filtered_df
 
 
-def calculate_best_num_topics(filtered_df, vectorizer, model, min_topics=2, max_topics_limit=15):
+def compute_coherence_scores(filtered_df, vectorizer, model, min_topics=2, max_topics_limit = 10):
+    coherence_scores = []
+    
+    # Transform texts to TF-IDF matrix
+    vectorizer_matrix = vectorizer.fit_transform(filtered_df["combined_name_ingredients"])
+    
+    # Tokenize each text in `texts` for Gensim's coherence calculation
+    tokenized_texts = [text.split() for text in filtered_df["combined_name_ingredients"]]
+    dictionary = Dictionary(tokenized_texts)
+    corpus = [dictionary.doc2bow(text) for text in tokenized_texts]
 
-    filtered_df = filtered_df.copy()
-    vectorizer_matrix = vectorizer.fit_transform(filtered_df["processed_name"])
-
-    # Ensure the matrix is valid
-    vectorizer_matrix = np.nan_to_num(vectorizer_matrix.toarray(), nan=0.0, posinf=0.0, neginf=0.0)
-
-    # Determine the maximum number of topics based on data size
     max_topics = min(max_topics_limit, vectorizer_matrix.shape[0])
-    best_num_topics = min_topics
-    best_error = float('inf')
-
-    # Evaluate reconstruction error for each topic count
-    for num_topics in range(min_topics, max_topics + 1):
-        called_model = model(n_components=num_topics, random_state=42)
-        called_model.fit(vectorizer_matrix)
-        topic_matrix = called_model.transform(vectorizer_matrix)
-        reconstruction_error = mean_squared_error(vectorizer_matrix, np.dot(topic_matrix, called_model.components_))
+    num_topics_range = range(min_topics, max_topics + 1)
         
-        # Update best error and topic count
-        if reconstruction_error < best_error:
-            best_error = reconstruction_error
-            best_num_topics = num_topics
+    # Iterate over each specified topic count
+    for num_topics in num_topics_range :
+        called_model = model(n_components=num_topics, random_state=42)
+        called_matrix = called_model.fit_transform(vectorizer_matrix)
+        
+        # Extract top words for each topic and format as list of tokens
+        feature_names = vectorizer.get_feature_names_out()
+        topics = [[feature_names[i] for i in topic.argsort()[:-11:-1]] for topic in called_model.components_]
+        
+        tokenized_topics = [[word for word in topic] for topic in topics]# Coherence model requires a list of tokenized topics
 
-    print(f"Best number of topics: {best_num_topics}")
+        coherence_model = CoherenceModel(
+            topics=tokenized_topics, 
+            texts=tokenized_texts, 
+            dictionary=dictionary, 
+            coherence='c_v'
+        )
+        coherence_score = coherence_model.get_coherence()
+        coherence_scores.append(coherence_score)
+        
+        #print(f"Number of Topics: {num_topics}, Coherence Score: {coherence_score}")
+
+    # Find the best number of topics
+    best_num_topics = num_topics_range[coherence_scores.index(max(coherence_scores))]
+    print(f"Best Number of Topics: {best_num_topics} with Coherence Score: {max(coherence_scores)}")
+
     return best_num_topics
 
 
 def get_recommendations(filtered_df, vectorizer, model, num_recommendations=5): 
 
-    best_num_topics = calculate_best_num_topics(filtered_df, vectorizer = vectorizer, model = model)
+    best_num_topics = compute_coherence_scores(filtered_df, vectorizer = vectorizer, model = model)
 
-    vectorizer_matrix = vectorizer.fit_transform(filtered_df['processed_name'])
+    vectorizer_matrix = vectorizer.fit_transform(filtered_df["combined_name_ingredients"])
 
     # Ensure all values in tfidf_matrix are non-negative and finite
     vectorizer_matrix = np.nan_to_num(vectorizer_matrix.toarray(), nan=0.0, posinf=0.0, neginf=0.0)
