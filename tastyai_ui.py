@@ -40,6 +40,21 @@ allergen_options = sorted(allergen_options)
 st.title("TastyAI: Indian Recipe Recommendation System")
 st.write("Upload an image of a dish or select dish name from the given list, select Cuisine, select course, select diet type, select preparation time, and select any allergy information for recommendations.")
 
+# Define a function to filter based on user preferences
+def filter_recipes(df, cuisine=None, course=None, diet=None, prep_time=None, allergen_type=None):
+    filtered_df = df
+    if cuisine:
+        filtered_df = filtered_df[filtered_df['cuisine'] == cuisine]
+    if course:
+        filtered_df = filtered_df[filtered_df['course'] == course]
+    if diet:
+        filtered_df = filtered_df[filtered_df['diet'] == diet]
+    if prep_time:
+        filtered_df = filtered_df[filtered_df['categorized_prep_time'] == prep_time]
+    if allergen_type:
+        # Exclude recipes with allergens in user preference
+        filtered_df = filtered_df[~filtered_df['allergen_type'].apply(lambda x: bool(set(x) & set(allergen_type)))]
+    return filtered_df
 
 # Initialize session state for identified dish name and prediction status
 if 'predicted_dish_name' not in st.session_state:
