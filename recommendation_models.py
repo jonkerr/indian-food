@@ -33,7 +33,7 @@ count_vectorizer = CountVectorizer()
 
 # Find dish name in recipes and filter them based on user preferences
 
-# In[43]:
+# In[4]:
 
 
 def filter_recipes (df, dish_name, cuisine=None, course=None, diet=None, prep_time=None, allergen_type=None, debug=False): 
@@ -61,16 +61,16 @@ def filter_recipes (df, dish_name, cuisine=None, course=None, diet=None, prep_ti
     return filtered_df
 
 
-# In[87]:
+# In[5]:
 
 
-filtered_df = filter_recipes (processed_df, "cabbage carrot")## diet = "Vegetarian")
+filtered_df = filter_recipes (processed_df, "masala dosa")## diet = "Vegetarian")
 filtered_df
 
 
 # Calculate the best number of topics using coherence score for the filtered dataframe
 
-# In[88]:
+# In[6]:
 
 
 def compute_coherence_scores(filtered_df, vectorizer, model, min_topics=2, max_topics_limit = 10 ):
@@ -118,7 +118,7 @@ def compute_coherence_scores(filtered_df, vectorizer, model, min_topics=2, max_t
 
 # Train the recommendation model using topic models and vectorizers
 
-# In[89]:
+# In[7]:
 
 
 def get_recommendations(filtered_df, vectorizer, model, num_recommendations=5): 
@@ -162,39 +162,55 @@ def get_recommendations(filtered_df, vectorizer, model, num_recommendations=5):
     return recommended_recipes[['name', 'similarity_score', 'cleaned_ingredients', 'cuisine', 'course', 'diet', 'allergens', 'prep_time']]
 
 
+# In[8]:
+
+
+def get_recommendations_nmf_tfidf(filtered_df): 
+  return get_recommendations(filtered_df, tfidf_vectorizer, NMF, num_recommendations=5)
+
+def get_recommendations_nmf_count(filtered_df): 
+  return get_recommendations(filtered_df, count_vectorizer, NMF, num_recommendations=5)
+
+def get_recommendations_svd_tfidf(filtered_df):
+  return get_recommendations(filtered_df, tfidf_vectorizer, TruncatedSVD, num_recommendations=5)
+
+def get_recommendations_svd_count(filtered_df):
+  return get_recommendations(filtered_df, tfidf_vectorizer, TruncatedSVD, num_recommendations=5)
+
+
 # Get recipe recommendation using the best NMF model on TF-IDF vectorizer
 
-# In[38]:
+# In[9]:
 
 
-recommended_recipes_nmf_tfidf = get_recommendations(filtered_df, tfidf_vectorizer, NMF) 
+recommended_recipes_nmf_tfidf = get_recommendations_nmf_tfidf(filtered_df) 
 recommended_recipes_nmf_tfidf
 
 
 # Get recipe recommendation using best NMF model on Count vectorizer
 
-# In[9]:
+# In[10]:
 
 
-recommended_recipes_nmf_count = get_recommendations(filtered_df, count_vectorizer, NMF) 
+recommended_recipes_nmf_count = get_recommendations_nmf_count(filtered_df) 
 recommended_recipes_nmf_count
 
 
 # Get recipe recommendation using best SVD model on TF-IDF vectorizer
 
-# In[10]:
+# In[11]:
 
 
-recommended_recipes_svd_tfidf = get_recommendations(filtered_df, tfidf_vectorizer, TruncatedSVD) 
+recommended_recipes_svd_tfidf = get_recommendations_svd_tfidf(filtered_df) 
 recommended_recipes_svd_tfidf
 
 
 # Get recipe recommendation using best SVD model on Count vectorizer
 
-# In[11]:
+# In[12]:
 
 
-recommended_recipes_svd_count = get_recommendations(filtered_df, count_vectorizer, TruncatedSVD) 
+recommended_recipes_svd_count = get_recommendations_svd_count(filtered_df) 
 recommended_recipes_svd_count
 
 
@@ -206,7 +222,7 @@ recommended_recipes_svd_count
 
 # Calculate the best number of topics using coherence score for only filtered_df["processed_name"]
 
-# In[12]:
+# In[13]:
 
 
 def compute_coherence_scores_name(filtered_df, vectorizer, model, min_topics=2, max_topics_limit = 30):
@@ -254,7 +270,7 @@ def compute_coherence_scores_name(filtered_df, vectorizer, model, min_topics=2, 
 
 # Train the recommendation model using topic models and vectorizers for only filtered_df["processed_name"]
 
-# In[13]:
+# In[14]:
 
 
 def get_recommendations_name(filtered_df, vectorizer, model, num_recommendations=5): 
@@ -298,28 +314,28 @@ def get_recommendations_name(filtered_df, vectorizer, model, num_recommendations
 
 # Compare recipes recommended by NMF and SVD models on Tf-IDF and Count vectorizers using only filtered_df["processed_name"]
 
-# In[14]:
+# In[15]:
 
 
 name_recommended_recipes_nmf_tfidf = get_recommendations_name(filtered_df, tfidf_vectorizer, NMF) 
 name_recommended_recipes_nmf_tfidf
 
 
-# In[15]:
+# In[16]:
 
 
 name_recommended_recipes_nmf_count = get_recommendations_name(filtered_df, count_vectorizer, NMF) 
 name_recommended_recipes_nmf_count
 
 
-# In[16]:
+# In[17]:
 
 
 name_recommended_recipes_svd_tfidf = get_recommendations_name(filtered_df, tfidf_vectorizer, TruncatedSVD) 
 name_recommended_recipes_svd_tfidf
 
 
-# In[17]:
+# In[18]:
 
 
 name_recommended_recipes_svd_count = get_recommendations_name(filtered_df, count_vectorizer, TruncatedSVD) 
@@ -332,7 +348,9 @@ name_recommended_recipes_svd_count
 
 
 
-# In[18]:
+# Save models and vectoriers used in recommendation system
+
+# In[39]:
 
 
 def save_model(model, file_name, path='models'):
@@ -343,7 +361,7 @@ def save_model(model, file_name, path='models'):
         pickle.dump(model, f)
 
 
-# In[19]:
+# In[40]:
 
 
 def save_vectorizer(vectorizer, file_name, path='models'):
@@ -354,7 +372,7 @@ def save_vectorizer(vectorizer, file_name, path='models'):
         pickle.dump(vectorizer, f)
 
 
-# In[ ]:
+# In[41]:
 
 
 def get_recommendations_save_pickles(filtered_df, vectorizer, model, file_name, path, num_recommendations=5): 
@@ -398,43 +416,45 @@ def get_recommendations_save_pickles(filtered_df, vectorizer, model, file_name, 
     return None
 
 
-# In[ ]:
+# In[42]:
 
 
 #tfidf_vect = get_recommendations_save_pickles(filtered_df, tfidf_vectorizer, NMF, "tfidf_vectorizer.pkl", path='models')
 
 
-# In[ ]:
+# In[43]:
 
 
 #count_vect = get_recommendations_save_pickles(filtered_df, count_vectorizer, NMF, "count_vectorizer.pkl", path='models')
 
 
-# In[ ]:
+# In[44]:
 
 
 #nmf_tfid_model = get_recommendations(filtered_df, tfidf_vectorizer, NMF, "nmf_tfidf_model.pkl", path='models')
 
 
-# In[ ]:
+# In[45]:
 
 
 #nmf_count_model = get_recommendations(filtered_df, count_vectorizer, NMF, "nmf_count_model.pkl", path='models')
 
 
-# In[ ]:
+# In[46]:
 
 
 #svd_tfidf_model = get_recommendations(filtered_df, tfidf_vectorizer, TruncatedSVD,"svd_tfidf_model.pkl", path='models')
 
 
-# In[ ]:
+# In[47]:
 
 
 #svd_count_model = get_recommendations(filtered_df, count_vectorizer,TruncatedSVD, "svd_count_model.pkl", path='models')#
 
 
-# In[27]:
+# Load models and vectoriers used in recommendation system
+
+# In[48]:
 
 
 def get_model(file_name, path='models'):
@@ -447,35 +467,35 @@ def get_model(file_name, path='models'):
         return pickle.load(f)
 
 
-# In[ ]:
+# In[49]:
 
 
 #nmf_tfidf = get_model("nmf_tfidf_model.pkl", "models")
 #nmf_tfidf 
 
 
-# In[ ]:
+# In[50]:
 
 
 #nmf_count = get_model("nmf_count_model.pkl", "models")
 #nmf_count
 
 
-# In[ ]:
+# In[51]:
 
 
 #svd_tfidf = get_model("svd_tfidf_model.pkl", "models")
 #svd_tfidf
 
 
-# In[ ]:
+# In[52]:
 
 
 #svd_count = get_model("svd_count_model.pkl", "models")
 #svd_count
 
 
-# In[77]:
+# In[53]:
 
 
 def get_vectorizer(file_name, path='models'):
@@ -488,21 +508,23 @@ def get_vectorizer(file_name, path='models'):
         return pickle.load(f)
 
 
-# In[ ]:
+# In[54]:
 
 
 #tfidf_vec = get_vectorizer("tfidf_vectorizer.pkl", "models")
 #tfidf_vec
 
 
-# In[ ]:
+# In[55]:
 
 
 #count_vec = get_vectorizer("count_vectorizer.pkl", "models")
 #count_vec
 
 
-# In[46]:
+# Evaluate recommendation models using Precision@k, Recall@k, and Coverage
+
+# In[56]:
 
 
 from sklearn.metrics import precision_score, recall_score
@@ -546,13 +568,12 @@ def evaluate_recommendations(filtered_df, recommendations, processed_df, user_pr
 
     return metrics
 
-# Example usage
-# Define user preferences
-user_preferences = {
-    'cuisine': 'fusion',
-    'course': 'snack',
-    'diet': 'Vegetarian',
-}
+
+# In[57]:
+
+
+# Example 
+user_preferences = {'cuisine': 'fusion', 'course': 'snack', 'diet': 'Vegetarian'}
 
 # Find filtered recipes based on user preferences
 filtered_df = filter_recipes(processed_df, "masala dosa", **user_preferences)
