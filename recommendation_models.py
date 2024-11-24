@@ -11,7 +11,7 @@ from gensim.models.coherencemodel import CoherenceModel
 
 processed_df = pd.read_pickle("data/processed_recipes.pkl")
 
-
+#Find dish name in recipes and filter them based on user preferences
 def filter_recipes (df, dish_name, cuisine=None, course=None, diet=None, prep_time=None, allergen_type=None, debug=False): 
   
     filtered_df = df[df['name'].str.contains(dish_name, case=False, na=False)]
@@ -36,7 +36,7 @@ def filter_recipes (df, dish_name, cuisine=None, course=None, diet=None, prep_ti
     print(f"Number of dishes after filtering: {filtered_df.shape[0]}")
     return filtered_df
 
-
+#Calculate the best number of topics using coherence score for the filtered dataframe
 def compute_coherence_scores(filtered_df, vectorizer, model, min_topics=2, max_topics_limit = 10):
     coherence_scores = []
     
@@ -79,42 +79,56 @@ def compute_coherence_scores(filtered_df, vectorizer, model, min_topics=2, max_t
 
     return best_num_topics
 
+#Train the recommendation model using topic models and vectorizers
+def get_recommendations(filtered_df, vectorizer, model, num_recommendations=5):
+    # Compute the optimal number of topics
+    best_num_topics = compute_coherence_scores(filtered_df, vectorizer, model)
 
-def get_recommendations(filtered_df, vectorizer, model, num_recommendations=5): 
+    # Transform the text data into a TF-IDF matrix
+    vectorizer_matrix = vectorizer.fit_transform(filtered_df['combined_name_ingredients'])
 
-    best_num_topics = compute_coherence_scores(filtered_df, vectorizer = vectorizer, model = model)
-
-    vectorizer_matrix = vectorizer.fit_transform(filtered_df["combined_name_ingredients"])
-
-    # Ensure all values in tfidf_matrix are non-negative and finite
+    # Ensure all values in the TF-IDF matrix are non-negative and finite
     vectorizer_matrix = np.nan_to_num(vectorizer_matrix.toarray(), nan=0.0, posinf=0.0, neginf=0.0)
 
-    # Train the NMF model with the optimal number of topics    
+    # Train the NMF model with the optimal number of topics
     called_model = model(n_components=best_num_topics, random_state=42)
     called_model.fit(vectorizer_matrix)
     topic_matrix = called_model.transform(vectorizer_matrix)  # Topic distribution for each recipe
 
+    # Copy the filtered DataFrame to avoid overwriting the original
     filtered_df = filtered_df.copy()
 
     # Add topic distributions to the filtered DataFrame
     for i in range(best_num_topics):
         filtered_df[f'topic_{i}'] = topic_matrix[:, i]
 
-    # Locate the index of the dish within the filtered DataFrame
-    dish_index = filtered_df.reset_index().index[0]  # Get the first match if there are multiple
-
-    # Calculate cosine similarity for the topics
+    # Compute cosine similarities for all dishes
     cosine_similarities = cosine_similarity(topic_matrix)
-    
-    # Get indices of the most similar recipes
-    similar_indices = cosine_similarities[dish_index].argsort()[-num_recommendations-1:-1][::-1]
 
-    # Fetch recommended recipes
-    recommended_recipes = filtered_df.iloc[similar_indices].copy()
-    recommended_recipes["similarity_score"] = cosine_similarities[dish_index][similar_indices]
+    # Variables to track the best set of dishes and the highest average similarity score
+    highest_avg_score = 0.0
+    best_set_indices = []
 
-    # Scale and format similarity scores to percentages
-    recommended_recipes['similarity_score'] = (recommended_recipes['similarity_score'] * 100).round(2).astype(str) + '%'
+    # Loop through each dish and calculate the average similarity of its top similar dishes
+    for dish_index in range(len(filtered_df)):
+        # Get indices of the most similar recipes for the current dish
+        similar_indices = cosine_similarities[dish_index].argsort()[-num_recommendations-1:-1][::-1]
+
+        # Compute the average similarity score for the top similar dishes
+        avg_similarity = cosine_similarities[dish_index][similar_indices].mean()
+
+        # Update the best set of dishes if the current average similarity is higher
+        if avg_similarity > highest_avg_score:
+            highest_avg_score = avg_similarity
+            best_set_indices = similar_indices
+            best_similarity_scores = cosine_similarities[dish_index][similar_indices]
+
+    # Create a DataFrame with the top recommended dishes
+    recommended_recipes = filtered_df.iloc[best_set_indices].copy()
+    recommended_recipes['similarity_score'] = [f"{(score * 100):.2f}%" for score in best_similarity_scores]
+
+    # Print the highest average similarity score among all dishes
+    print(f"\nHighest average similarity score among all dishes: {highest_avg_score:.4f}\n")
 
     return recommended_recipes[['name', 'similarity_score', 'cleaned_ingredients', 'cuisine', 'course', 'diet', 'allergens', 'prep_time']]
 
@@ -130,3 +144,42 @@ def get_recommendations_svd_tfidf(filtered_df):
 
 def get_recommendations_svd_count(filtered_df):
   return get_recommendations(filtered_df, CountVectorizer(), TruncatedSVD, num_recommendations=5)
+
+
+#Compare recommendation models and choose the one with the highest average of similarity score as the best model 
+def compare_recommendation_models(filtered_df):
+    # Define a dictionary to store model functions and names
+    model_functions = {"NMF_TFIDF": get_recommendations_nmf_tfidf, "NMF_Count": get_recommendations_nmf_count,
+        "SVD_TFIDF": get_recommendations_svd_tfidf, "SVD_Count": get_recommendations_svd_count }
+
+    results = []
+    all_recommendations = {}
+
+    for model_name, model_func in model_functions.items():
+        # Get recommendations using the model
+        recommended_recipes = model_func(filtered_df)
+
+         # Store the recommendations for the current model
+        all_recommendations[model_name] = recommended_recipes
+
+        # Extract similarity scores and calculate the average
+        similarity_scores = recommended_recipes['similarity_score'].str.rstrip('%').astype(float) / 100
+        average_score = similarity_scores.mean()
+
+        # Append the results to the list
+        results.append({"Model": model_name, "Average Similarity Score": average_score})
+
+    # Make a DataFrame for the results for better visualizacomparison
+    similarity_df = pd.DataFrame(results)
+
+    # Find the model with the highest average similarity score
+    best_model = similarity_df.loc[similarity_df["Average Similarity Score"].idxmax()]
+    best_model_name = best_model['Model']
+    best_recommendations = all_recommendations[best_model_name]
+
+    print("Comparison Table:")
+    print(similarity_df)
+
+    print(f"\nBest Model: {best_model['Model']} with Average Similarity Score: {best_model['Average Similarity Score']:.4f}")
+
+    return best_recommendations
