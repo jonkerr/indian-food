@@ -1,0 +1,21 @@
+# Deny all
+*
+
+# allowed python files
+!cv_model.py
+!cv_predict.py
+!image_gen.py
+!image_prep.py
+!recommendation_models.py
+!tastyai_ui.py
+
+# allowed data
+!data/Food_Classification/chole_bhature/002.jpg
+!data/nohindi_recipes.pkl
+!data/processed_recipes.pkl
+!data/pre_processed/mapping.pkl
+
+# allowed models
+!models/efficientnet_v2_20_84.64.keras 
+!models/weights/efficientnet_v2_20_84.64.hdf5 
+!models/*.pkl
