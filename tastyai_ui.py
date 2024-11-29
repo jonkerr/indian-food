@@ -7,6 +7,12 @@ import tempfile
 from cv_predict import TastyFoodPredictor
 from recommendation_models import get_recommendations_svd_tfidf  # Import functions
 
+DEBUG = False
+def print_debug(*args, **kwargs):
+    if DEBUG:
+        print(*args, **kwargs)
+        
+
 def main():
     # Load DataFrames from pickle files
     processed_df = pd.read_pickle("data/processed_recipes.pkl")
@@ -19,7 +25,7 @@ def main():
 
     # Function to format dish names
     def format_dish_name(dish_name):
-        print('test1')
+        print_debug('test1')
         # Remove special characters (replace underscores with spaces)
         predicted_dish_name_for_filter = dish_name.replace("_", " ")
         formatted_name = dish_name.replace("_", " ").title()
@@ -40,14 +46,14 @@ def main():
 
     # Initialize session state variables
     if 'predicted_dish_name' not in st.session_state:
-        print('test2')
+        print_debug('test2')
         reset_session_state()
 
     # Title and instructions
     st.title("TastyAI: Indian Recipe Recommendation System")
     st.write("Upload an image of a dish or select a dish name from the given list, select Cuisine, select course, select diet type, select preparation time, and select any allergy information for recommendations.")
 
-    print('test3')
+    print_debug('test3')
 
     # 1. Image Upload (Optional)
     uploaded_image = st.file_uploader("Upload an Image (optional)", type=["jpg", "jpeg", "png"])
@@ -60,7 +66,7 @@ def main():
 
         # Button to identify dish name using the pre-trained model
         if st.button("Identify Dish Name"):
-            print('test5')
+            print_debug('test5')
             # Save the uploaded image as a temporary file
             with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as temp_image_file:
                 temp_image_path = temp_image_file.name
@@ -78,7 +84,7 @@ def main():
                 if os.path.exists(temp_image_path):
                     os.remove(temp_image_path)
 
-        print('test6')
+        print_debug('test6')
 
     # Add a label "OR" between the image uploader and the dropdown
     st.markdown("<h3 style='text-align: center;'>OR</h3>", unsafe_allow_html=True)
@@ -136,9 +142,9 @@ def main():
 
     def filter_recipes (df, dish_name, cuisine=None, course=None, diet=None, prep_time=None, allergen_type=None, debug=False): 
 
-        print('test7')
+        print_debug('test7')
         filtered_df = df[df['name'].str.contains(dish_name, case=False, na=False)]
-        print ((f"Number of found dishes before filtering : {filtered_df.shape[0]}"))
+        print_debug ((f"Number of found dishes before filtering : {filtered_df.shape[0]}"))
 
         print(cuisine, course, diet, prep_time, allergen_type)
 
@@ -167,7 +173,7 @@ def main():
             allergen_set = allergen_type
             filtered_df = filtered_df[~filtered_df['allergen_type'].apply(lambda x: bool(set(x) & allergen_set))]
 
-        print('test8')
+        print_debug('test8')
 
         if filtered_df.empty:
             print("No recipes found matching the criteria.")
