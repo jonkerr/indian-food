@@ -27,10 +27,10 @@ def main():
 
     # Function to reset session state
     def reset_session_state():
-        st.session_state['predicted_dish_name'] = st.session_state.get('predicted_dish_name', "Select an option")
-        st.session_state['unformatted_dish_name'] = st.session_state.get('unformatted_dish_name', None)
+        st.session_state['predicted_dish_name'] = "Select an option"  # Reset predicted dish name
+        st.session_state['unformatted_dish_name'] = None  # Clear unformatted dish name
         st.session_state['prediction_done'] = False
-        st.session_state['reset_done'] = False
+        st.session_state['reset_done'] = True
         st.session_state['selected_recipe'] = "Select an option"
         st.session_state['selected_cuisine'] = "Select an option"
         st.session_state['selected_course'] = "Select an option"
@@ -135,22 +135,36 @@ def main():
     )
 
     def filter_recipes (df, dish_name, cuisine=None, course=None, diet=None, prep_time=None, allergen_type=None, debug=False): 
-  
+
         print('test7')
         filtered_df = df[df['name'].str.contains(dish_name, case=False, na=False)]
         print ((f"Number of found dishes before filtering : {filtered_df.shape[0]}"))
 
+        print(cuisine, course, diet, prep_time, allergen_type)
+
+        cuisine = None if cuisine == "Select an option" else cuisine
+        course = None if course == "Select an option" else course
+        diet = None if diet == "Select an option" else diet
+        prep_time = None if prep_time == "Select an option" else prep_time
+        allergen_type = set(allergen_type) if allergen_type else None
+
+        print(cuisine, course, diet, prep_time, allergen_type)
         if cuisine:
-            filtered_df = filtered_df[filtered_df['cuisine'] .str.lower() == cuisine.lower()]
+            print('test cuisine')
+            filtered_df = filtered_df[filtered_df['cuisine'].str.lower() == cuisine.lower()]
         if course:
+            print('test course')
             filtered_df = filtered_df[filtered_df['course'].str.lower() == course.lower()]
         if diet:
-            filtered_df = filtered_df[filtered_df['diet'] .str.lower() == diet.lower()]
+            print('test diet')
+            filtered_df = filtered_df[filtered_df['diet'].str.lower() == diet.lower()]
         if prep_time:
+            print('test preop_time')
             filtered_df = filtered_df[filtered_df['categorized_prep_time'] == prep_time]
         if allergen_type:
+            print('test allergen tyoe')
             # Exclude recipes with allergens in user preference
-            allergen_set = set(allergen_type)
+            allergen_set = allergen_type
             filtered_df = filtered_df[~filtered_df['allergen_type'].apply(lambda x: bool(set(x) & allergen_set))]
 
         print('test8')
@@ -198,30 +212,50 @@ def main():
                 # Get recommendations using get_recommendations_svd_tfidf
                 recommended_recipes = get_recommendations_svd_tfidf(filtered_df)
 
-                if not recommended_recipes.empty:
-                    st.write("Recommended Recipes:")
-                    for _, row in recommended_recipes.iterrows():
-                        formatted_name, _ = format_dish_name(row['name'])
-                        st.subheader(formatted_name)
+                if recommended_recipes is not None and not recommended_recipes.empty:
+                    st.write(f"Recommended Recipes ({len(recommended_recipes)} found):")
 
+                    # Iterate over all recommended recipes and display details
+                    for index, row in recommended_recipes.iterrows():
+                        st.write(f"Recipe {index + 1} of {len(recommended_recipes)}")  # Log recipe index for debugging
+                        print(f"Displaying recipe {index + 1}: {row['name']}")  # Debug print
+
+                        # Format the recipe name for display
+                        formatted_name, _ = format_dish_name(row['name'])
+                        st.markdown(f"### **{formatted_name}**")
+
+                        # Display recipe image if it exists
                         image_path = os.path.join(recipe_images_path, f"{row['name']}.jpg")
                         if os.path.exists(image_path):
                             recipe_image = Image.open(image_path)
                             st.image(recipe_image, caption=formatted_name, use_column_width=True)
+                        else:
+                            st.write("**Image not available**")
 
-                        st.write(f"Cuisine: {row['cuisine']}")
-                        st.write(f"Course: {row['course']}")
-                        st.write(f"Diet Type: {row['diet']}")
-                        st.write(f"Preparation Time: {row['prep_time']}")
-                        st.write(f"Ingredients: {row['cleaned_ingredients']}")
-                        st.write("Allergens:", row['allergens'])
-                        st.write("")
+                        # Display recipe details with improved formatting
+                        st.markdown(f"**<span style='color:blue;'>Cuisine:</span>** {row['cuisine']}", unsafe_allow_html=True)
+                        st.markdown(f"**<span style='color:blue;'>Course:</span>** {row['course']}", unsafe_allow_html=True)
+                        st.markdown(f"**<span style='color:blue;'>Diet Type:</span>** {row['diet']}", unsafe_allow_html=True)
+                        st.markdown(f"**<span style='color:blue;'>Preparation Time:</span>** {row['prep_time']} minutes", unsafe_allow_html=True)
+
+                        # Format and display the ingredients
+                        ingredients = row['cleaned_ingredients']
+                        formatted_ingredients = "\n".join(f"- {ingredient}" for ingredient in ingredients)
+                        st.markdown("**<span style='color:blue;'>Ingredients:</span>**", unsafe_allow_html=True)
+                        st.markdown(formatted_ingredients)
+
+                        # Format and display allergens as a comma-separated list
+                        allergens = ", ".join(row['allergens'])
+                        st.markdown(f"**<span style='color:blue;'>Allergens:</span>** {allergens}", unsafe_allow_html=True)
+
+                        st.write("---")  # Separator between recipes
                 else:
                     st.write("No recommendations available.")
 
         # Add "Search Another Recipe" button
         if st.button("Search Another Recipe"):
             reset_session_state()
+            print("Session state after reset:", st.session_state)
             st.experimental_rerun()
 
 if __name__ == '__main__':
