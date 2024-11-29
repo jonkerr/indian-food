@@ -140,6 +140,8 @@ scratch.py
 scratch.ipynb
 ignore/
 delete/
+test_app/
+
 
 # hide image cache
 image_df.pkl.xz
@@ -149,3 +151,5 @@ image_data_prep_idf.ipynb
 
 # model is too big to push to git
 *.keras
+*.tflite
+*.hdf5
