@@ -94,12 +94,12 @@ def main():
     else:
         selected_dish_index = 0
 
-    # Dropdown logic
+    # Dropdown is disabled only if a prediction is made and not reset
     dropdown_disabled = st.session_state['prediction_done'] and not st.session_state['reset_done']
     selected_recipe = st.selectbox(
         "Select a dish name",
         dish_options,
-        index=selected_dish_index,
+        index=dish_options.index(st.session_state.get('selected_recipe', "Select an option")),
         disabled=dropdown_disabled,
         key="selected_recipe"
     )
@@ -150,16 +150,12 @@ def main():
 
         print(cuisine, course, diet, prep_time, allergen_type)
         if cuisine:
-            print('test cuisine')
             filtered_df = filtered_df[filtered_df['cuisine'].str.lower() == cuisine.lower()]
         if course:
-            print('test course')
             filtered_df = filtered_df[filtered_df['course'].str.lower() == course.lower()]
         if diet:
-            print('test diet')
             filtered_df = filtered_df[filtered_df['diet'].str.lower() == diet.lower()]
         if prep_time:
-            print('test preop_time')
             filtered_df = filtered_df[filtered_df['categorized_prep_time'] == prep_time]
         if allergen_type:
             print('test allergen tyoe')
