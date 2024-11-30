@@ -18,11 +18,11 @@ def filter_recipes (df, dish_name, cuisine=None, course=None, diet=None, prep_ti
     print ((f"Number of found dishes before filtering : {filtered_df.shape[0]}"))
 
     if cuisine:
-        filtered_df = filtered_df[filtered_df['cuisine'] .str.lower() == cuisine.lower()]
+        filtered_df = filtered_df[filtered_df['cuisine'].str.lower() == cuisine.lower()]
     if course:
         filtered_df = filtered_df[filtered_df['course'].str.lower() == course.lower()]
     if diet:
-        filtered_df = filtered_df[filtered_df['diet'] .str.lower() == diet.lower()]
+        filtered_df = filtered_df[filtered_df['diet'].str.lower() == diet.lower()]
     if prep_time:
         filtered_df = filtered_df[filtered_df['categorized_prep_time'] == prep_time]
     if allergen_type:
@@ -105,33 +105,50 @@ def get_recommendations(filtered_df, vectorizer, model, num_recommendations=5):
     # Compute cosine similarities for all dishes
     cosine_similarities = cosine_similarity(topic_matrix)
 
-    # Variables to track the best set of dishes and the highest average similarity score
-    highest_avg_score = 0.0
-    best_set_indices = []
+    if len(filtered_df) > num_recommendations:
+        # More recipes than the number of recommendations
+        highest_avg_score = 0.0
+        best_set_indices = []
 
-    # Loop through each dish and calculate the average similarity of its top similar dishes
-    for dish_index in range(len(filtered_df)):
-        # Get indices of the most similar recipes for the current dish
-        similar_indices = cosine_similarities[dish_index].argsort()[-num_recommendations-1:-1][::-1]
+        # Loop through each dish and calculate the average similarity of its top similar dishes
+        for dish_index in range(len(filtered_df)):
+            # Get indices of the most similar recipes for the current dish
+            similar_indices = cosine_similarities[dish_index].argsort()[-num_recommendations-1:-1][::-1]
 
-        # Compute the average similarity score for the top similar dishes
-        avg_similarity = cosine_similarities[dish_index][similar_indices].mean()
+            # Compute the average similarity score for the top similar dishes
+            avg_similarity = cosine_similarities[dish_index][similar_indices].mean()
 
-        # Update the best set of dishes if the current average similarity is higher
-        if avg_similarity > highest_avg_score:
-            highest_avg_score = avg_similarity
-            best_set_indices = similar_indices
-            best_similarity_scores = cosine_similarities[dish_index][similar_indices]
+            # Update the best set of dishes if the current average similarity is higher
+            if avg_similarity > highest_avg_score:
+                highest_avg_score = avg_similarity
+                best_set_indices = similar_indices
+                best_similarity_scores = cosine_similarities[dish_index][similar_indices]
 
-    # Create a DataFrame with the top recommended dishes
-    recommended_recipes = filtered_df.iloc[best_set_indices].copy()
-    recommended_recipes['similarity_score'] = [f"{(score * 100):.2f}%" for score in best_similarity_scores]
+        # Create a DataFrame with the top recommended dishes
+        recommended_recipes = filtered_df.iloc[best_set_indices].copy()
+        recommended_recipes['similarity_score'] = [f"{(score * 100):.2f}%" for score in best_similarity_scores]
 
-    # Print the highest average similarity score among all dishes
-    print(f"\nHighest average similarity score among all dishes: {highest_avg_score:.4f}\n")
+        # Print the highest average similarity score
+        print(f"\nHighest average similarity score among all dishes: {highest_avg_score:.4f}\n")
 
-    return recommended_recipes[['name', 'similarity_score', 'cleaned_ingredients', 'cuisine', 'course', 'diet', 'allergens', 'prep_time']]
+        return recommended_recipes[['name', 'similarity_score', 'cleaned_ingredients', 'cuisine', 
+                                    'course', 'diet', 'allergens', 'prep_time', 'instructions']]
 
+    else:
+        # Less than or equal to the number of recommendations
+        base_recipe_index = 0  # Use the first recipe as the base
+        similarity_scores = cosine_similarities[base_recipe_index]
+        avg_similarity = similarity_scores.mean()
+
+        # Add similarity scores to the DataFrame
+        filtered_df['similarity_score'] = [f"{(score * 100):.2f}%" for score in similarity_scores]
+
+        # Print the average similarity score
+        print(f"\nAverage similarity score across all dishes: {avg_similarity:.4f}\n")
+
+        return filtered_df[['name', 'similarity_score', 'cleaned_ingredients', 'cuisine', 
+                            'course', 'diet', 'allergens', 'prep_time', 'instructions']]
+    
 
 def get_recommendations_nmf_tfidf(filtered_df): 
   return get_recommendations(filtered_df, TfidfVectorizer(), NMF, num_recommendations=5)
@@ -183,3 +200,4 @@ def compare_recommendation_models(filtered_df):
     print(f"\nBest Model: {best_model['Model']} with Average Similarity Score: {best_model['Average Similarity Score']:.4f}")
 
     return best_recommendations
+
