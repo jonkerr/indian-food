@@ -153,3 +153,8 @@ image_data_prep_idf.ipynb
 *.keras
 *.tflite
 *.hdf5
+
+
+# May or may not use these
+tastyai_ui_modular.py
+ui_helpers.py
