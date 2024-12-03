@@ -7,6 +7,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 
 
+from tensorflow.keras.applications import EfficientNetV2L
 
 """
 Got a fair amount of inspiration for the base approach from:  https://www.kaggle.com/code/varsha300/transferlearning
@@ -58,11 +59,17 @@ def get_tasty_model(base_model, num_classes):
     x = Dense(4096, activation='relu')(x)
     x = Dropout(0.5)(x)
     x = BatchNormalization()(x)
-    x = Dense(1024, activation='relu')(x)
+    x = Dense(2048, activation='relu')(x)
     x = Dropout(0.5)(x)
     predictions = Dense(num_classes, activation='softmax')(x)
     return Model(inputs=base_model.input, outputs=predictions)    
     
+    
+def get_empty_model(num_classes=20):
+    empty_model = EfficientNetV2L(weights=None, include_top=False, input_tensor=Input(shape=(IMG_SIZE[0], IMG_SIZE[1], 3)))   
+    model = get_tasty_model(empty_model, num_classes)
+    return model
+
 
 def train_model(tasty_model, X_train, y_train, X_val, y_val, batch_size, epochs, verbose):
     """
