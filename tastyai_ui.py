@@ -5,10 +5,10 @@ import os
 import numpy as np
 import tempfile
 from cv_predict import TastyFoodPredictor
-# from recommendation_models import get_recommendations_svd_tfidf  # Import functions
-# from compare_recommendation_models import compare_recommendation_models
 from feedback_reinf_learn_recommendation_model import FeedbackRecommendationModel
 from save_user_feedback import save_feedback
+from ui_functions import reset_session_state, format_dish_name, filter_empty_option_and_df, format_instructions
+
 
 def main():
     # Load DataFrames from pickle files
@@ -24,32 +24,6 @@ def main():
     # Define path for recipe images
     recipe_images_path = "data/indian_food_images/" 
 
-    # Function to reset session state
-    def reset_session_state():
-        """
-        Reset all session state variables, including clearing the uploaded image.
-        """
-        st.session_state['uploaded_image'] = None  # uploaded image is cleared
-        st.session_state['predicted_dish_name'] = "Select an option"  # Reset predicted dish name
-        st.session_state['unformatted_dish_name'] = None  # Clear unformatted dish name
-        st.session_state['prediction_done'] = False
-        st.session_state['reset_done'] = True
-        st.session_state['selected_recipe'] = "Select an option"
-        st.session_state['selected_cuisine'] = "Select an option"
-        st.session_state['selected_course'] = "Select an option"
-        st.session_state['selected_diet_type'] = "Select an option"
-        st.session_state['selected_prep_time'] = "Select an option"
-        st.session_state['selected_allergies'] = []
-        st.session_state['feedback_dict'] = {}  # Clear feedback dictionary
-
-    # Function to format dish names
-    def format_dish_name(dish_name):
-        print('test1')
-        # Remove special characters (replace underscores with spaces)
-        predicted_dish_name_for_filter = dish_name.replace("_", " ")
-        formatted_name = dish_name.replace("_", " ").title()
-        return formatted_name, predicted_dish_name_for_filter
-
     # Initialize session state variables
     if 'predicted_dish_name' not in st.session_state:
         reset_session_state()
@@ -59,12 +33,24 @@ def main():
     st.write("Upload an image of a dish or select a dish name from the given list, select Cuisine, select course, select diet type, select preparation time, and select any allergy information for recommendations.")
 
     # 1. Image Upload (Optional)
-    uploaded_image = st.file_uploader("Upload an Image (optional)", type=["jpg", "jpeg", "png"])
+    if 'uploaded_image' not in st.session_state:
+        st.session_state['uploaded_image'] = None  # Initialize session state for the uploaded image
 
-    # Display uploaded image and provide an "Identify Dish Name" button
-    if uploaded_image is not None:
-        image = Image.open(uploaded_image)
+    # Display the file uploader
+    uploaded_image = st.file_uploader(
+        "Upload an Image (optional)",
+        type=["jpg", "jpeg"],
+        key=st.session_state.get('file_uploader_key', 'default_uploader_key')
+    )
+
+    # Display uploaded image if present in session state
+    if st.session_state.get('uploaded_image') is not None:
+        image = Image.open(st.session_state['uploaded_image'])
         st.image(image, caption="Uploaded Image", use_column_width=True)
+
+    # Save uploaded image to session state
+    if uploaded_image is not None:
+        st.session_state['uploaded_image'] = uploaded_image
 
         # Button to identify dish name using the pre-trained model
         if st.button("Identify Dish Name"):
@@ -93,18 +79,17 @@ def main():
         format_dish_name(name)[0] for name in processed_df["name"].unique()
     ]
 
-    # Ensuring dropdown uses the formatted predicted dish name
-    if st.session_state['predicted_dish_name'] in dish_options:
-        selected_dish_index = dish_options.index(st.session_state['predicted_dish_name'])
-    else:
-        selected_dish_index = 0
+    # Ensure dropdown uses the formatted predicted dish name
+    if st.session_state.get('reset_trigger', False):
+        st.session_state['selected_recipe'] = "Select an option"  # Reset state
+        st.session_state['reset_trigger'] = False  # Clear the reset trigger
 
     # Dropdown is disabled only if a prediction is made and not reset
     dropdown_disabled = st.session_state['prediction_done'] and not st.session_state['reset_done']
     selected_recipe = st.selectbox(
         "Select a dish name",
         dish_options,
-        index=dish_options.index(st.session_state['selected_recipe']),
+        index=dish_options.index(st.session_state.get('selected_recipe', "Select an option")),
         disabled=dropdown_disabled,
         key="selected_recipe"
     )
@@ -139,44 +124,6 @@ def main():
         key="selected_allergies"
     )
 
-    def filter_recipes (df, dish_name, cuisine=None, course=None, diet=None, prep_time=None, allergen_type=None, debug=False): 
-
-        print('test7')
-        filtered_df = df[df['name'].str.contains(dish_name, case=False, na=False)]
-        print ((f"Number of found dishes before filtering : {filtered_df.shape[0]}"))
-
-        print(cuisine, course, diet, prep_time, allergen_type)
-
-        cuisine = None if cuisine == "Select an option" else cuisine
-        course = None if course == "Select an option" else course
-        diet = None if diet == "Select an option" else diet
-        prep_time = None if prep_time == "Select an option" else prep_time
-        allergen_type = set(allergen_type) if allergen_type else None
-
-        print(cuisine, course, diet, prep_time, allergen_type)
-        if cuisine:
-            filtered_df = filtered_df[filtered_df['cuisine'].str.lower() == cuisine.lower()]
-        if course:
-            filtered_df = filtered_df[filtered_df['course'].str.lower() == course.lower()]
-        if diet:
-            filtered_df = filtered_df[filtered_df['diet'].str.lower() == diet.lower()]
-        if prep_time:
-            filtered_df = filtered_df[filtered_df['categorized_prep_time'] == prep_time]
-        if allergen_type:
-            print('test allergen tyoe')
-            # Exclude recipes with allergens in user preference
-            allergen_set = allergen_type
-            filtered_df = filtered_df[~filtered_df['allergen_type'].apply(lambda x: bool(set(x) & allergen_set))]
-
-        print('test8')
-
-        if filtered_df.empty:
-            print("No recipes found matching the criteria.")
-            return None
-        print(f"Number of dishes after filtering: {filtered_df.shape[0]}")
-        # print(filtered_df.columns)
-        return filtered_df
-
     # Button to get recommendations
     if st.button("Find Recipe"):
         # Gather all user inputs
@@ -204,11 +151,8 @@ def main():
                 if st.session_state['selected_recipe'] == "Select an option" else format_dish_name(st.session_state['selected_recipe'])[1]
             )
 
-            # print(dish_name_to_use)
-            # print(processed_df.head())
-
-            # Filter the recipes using filter_recipes()
-            filtered_df = filter_recipes(
+            # Filter the recipes using filter_empty_option_and_df()
+            filtered_df = filter_empty_option_and_df(
                 processed_df,
                 dish_name_to_use,
                 cuisine=st.session_state['selected_cuisine'],
@@ -218,19 +162,16 @@ def main():
                 allergen_type=st.session_state['selected_allergies']
             )
 
-            print(filtered_df.head())
-
-            # filtered_df = processed_df.head()
+            # print(filtered_df.head())
 
             if filtered_df is None or filtered_df.empty:
                 st.write("No recipes match your filters.")
             else:
-                # Get recommendations using get_recommendations_svd_tfidf
-                # recommended_recipes = get_recommendations_svd_tfidf(filtered_df)
-                # Initialize the feedback model
+                # Get recommendations using FeedbackRecommendationModel
                 if 'feedback_model' not in st.session_state:
                     st.session_state['feedback_model'] = FeedbackRecommendationModel(processed_df)
                 
+                # Initialize the feedback model
                 feedback_model = st.session_state['feedback_model']
 
                 recommended_recipes = feedback_model.get_weighted_recommendations(filtered_df, user_inputs)
@@ -272,18 +213,7 @@ def main():
                             # Instructions
                             st.markdown("**<span style='color:blue;'>Instructions:</span>**", unsafe_allow_html=True)
                             if row.instructions:
-                                # Replace all occurrences of "\xa0" with a regular space in the entire text
-                                instructions = row.instructions.replace("\xa0", " ")
-                                # Replace ".," with ". " to properly format sentences
-                                instructions = instructions.replace(".,", ". ")
-                                # Split instructions into sentences at ". "
-                                instructions_list = instructions.split(". ")
-                                # Ensure any lingering "\xa0" characters are removed in each sentence after the split
-                                instructions_list = [sentence.replace("\xa0", " ").strip() for sentence in instructions_list]
-                                # Re-check and clean the last sentence after joining, just in case
-                                instructions_list = [sentence.strip() for sentence in instructions_list]
-                                # Generate formatted instructions as a list of bullet points
-                                formatted_instructions = "\n".join(f"- {instruction}" for instruction in instructions_list if instruction)
+                                formatted_instructions = format_instructions(row.instructions)
                                 # Display formatted instructions
                                 st.markdown(formatted_instructions)
                             else:
@@ -338,9 +268,10 @@ def main():
                                 # Update the model with the feedback
                                 feedback_model.update_weights(st.session_state['feedback_dict'])
                                 
-                                # Reset the session and clear everything, including the uploaded image
+                                print("Session state before reset:", st.session_state)
+                                # Reset everything, including the uploaded image
                                 reset_session_state()
-                                st.success("Thank you for your feedback! The page has been reset.")
+                                st.experimental_rerun()  # Ensure the UI refreshes completely
                     
                 else:
                     st.write("No recommendations available.")
@@ -348,5 +279,5 @@ def main():
 if __name__ == '__main__':
     # Necessary to avoid multiprocessing issues
     import os
-    os.environ['PYTHONWARNINGS'] = 'ignore'  # Optional: suppress warnings for cleaner output
+    os.environ['PYTHONWARNINGS'] = 'ignore'  # suppress warnings for cleaner output
     main()
