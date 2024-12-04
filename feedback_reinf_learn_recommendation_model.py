@@ -1,10 +1,12 @@
+import streamlit as st
 import numpy as np
 import os
 import json
 import pandas as pd
-from compare_recommendation_models import compare_recommendation_models
+from recommendation_models import compare_recommendation_models
 
 class FeedbackRecommendationModel:
+    # initiating feedback model
     def __init__(self, recipe_data, feedback_file="models/user_feedback.json"):
         self.recipe_data = recipe_data
         self.feedback_file = feedback_file
@@ -14,6 +16,7 @@ class FeedbackRecommendationModel:
             with open(self.feedback_file, "w") as f:
                 json.dump([], f)
 
+    # function to load feedback data to the json file "user_feedback.json" under models folder
     def load_feedback(self):
         """Load feedback data from the feedback file."""
         try:
@@ -22,6 +25,7 @@ class FeedbackRecommendationModel:
         except FileNotFoundError:
             return []
 
+    # this function aggregates the feedback for the user selected options from feedback data
     def aggregate_feedback(self, recommendations, feedback_data, user_inputs):
         """
         Aggregate feedback across multiple entries for the same recipe ID 
@@ -41,7 +45,7 @@ class FeedbackRecommendationModel:
         # Initialize weight adjustment for all recipe IDs
         recommendations["weight_adjustment"] = 0
 
-        # Process relevant feedback and compute average adjustments for recipe IDs
+        # Process relevant feedback and compute average adjustments
         adjustment_dict = {}
         for feedback_dict in relevant_feedback:
             for recipe_id, feedback in feedback_dict.items():
@@ -55,29 +59,21 @@ class FeedbackRecommendationModel:
         # Assign average weight adjustment for each recipe ID
         for recipe_id, adjustments in adjustment_dict.items():
             if recipe_id in recommendations.index:
-                # Filter recommendations to match recipe_id and optional parameters
-                matching_recommendations = recommendations.loc[
-                    (recommendations.index == recipe_id)
-                ]
-
-                # Further check optional parameters for alignment
-                for key, value in user_inputs.items():
-                    if value != "Select an option" and key in recommendations.columns:
-                        matching_recommendations = matching_recommendations.loc[
-                            matching_recommendations[key].str.lower() == value.lower()
-                        ]
-
-                # If matching entries are found, update the weight adjustment
-                if not matching_recommendations.empty:
-                    avg_adjustment = np.mean(adjustments)
-                    recommendations.loc[matching_recommendations.index, "weight_adjustment"] = avg_adjustment
+                avg_adjustment = np.mean(adjustments)
+                recommendations.loc[recipe_id, "weight_adjustment"] = avg_adjustment
 
         return recommendations
 
-
+    # this function uses user feedback into account to check if there is feedback matching user preferences, 
+    # if yes, then apply average weights of all matching feedback in addition to similarity score calculated by compare_recommendations() 
+    # then use combined score for updated recommendations
     def update_weights_with_feedback(self, recommendations, user_inputs):
         """Update weights based on feedback."""
         feedback_data = self.load_feedback()
+
+        # If no feedback exists, skip weight adjustments
+        if not feedback_data:
+            return recommendations
 
         # Ensure similarity_score is numeric
         recommendations["similarity_score"] = pd.to_numeric(
@@ -95,14 +91,33 @@ class FeedbackRecommendationModel:
         recommendations = recommendations.drop_duplicates(subset="name", keep="first").reset_index(drop=True)
 
         return recommendations
-
+    
+    # this function takes into account recommendatios created by compare_recommendations() functions which provides upto top 5 recipes 
+    # ranked by nmf/svd tfidf/count models
+    # then calls update_weights_with_feedback function which updates the weights of recommended recipes based on user feedback and suggests rerated recipes
     def get_weighted_recommendations(self, filtered_recipes, user_inputs):
         """Generate recommendations using compare_recommendation_models and adjust weights based on feedback."""
         # Step 1: Call compare_recommendation_models to get initial recommendations
         recommendations = compare_recommendation_models(filtered_recipes)
 
-        # Step 2: Update weights based on feedback
-        recommendations = self.update_weights_with_feedback(recommendations, user_inputs)
+        # Debug: Print recipe names from recommendations
+        if "name" in recommendations.columns:
+            recipe_names = recommendations["name"].tolist()
+            print("Recommended Recipe Names:", recipe_names)  # Debug print
+        else:
+            print("No 'name' column found in recommendations. Available columns:", recommendations.columns)
 
-        # Step 3: Return adjusted recommendations
+        # Step 2: If only one recommendation is provided, return it without feedback processing
+        if len(recommendations) == 1:
+            print('only 1 recommended recipe, displaying as is')
+            return recommendations
+
+        # Step 3: If no matching feedback exists, display recommendations as is
+        feedback_data = self.load_feedback()
+        if not feedback_data:
+            print('no feedback for user inputs, displaying as is')
+            return recommendations
+
+        # Step 4: Update weights based on feedback and return recommendations
+        recommendations = self.update_weights_with_feedback(recommendations, user_inputs)
         return recommendations
