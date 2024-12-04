@@ -119,3 +119,20 @@ def get_vectorizer(file_name, path='models'):
     
     with open(full_path, 'rb') as f:
         return pickle.load(f)
+    
+#Save models and vectorizers trained in the recommendation system
+#tfidf_vect = get_recommendations_save_pickles(filtered_df, tfidf_vectorizer, NMF, "tfidf_vectorizer.pkl", path='models')  
+#count_vect = get_recommendations_save_pickles(filtered_df, count_vectorizer, NMF, "count_vectorizer.pkl", path='models')
+#nmf_tfid_model = get_recommendations_save_pickles(filtered_df, tfidf_vectorizer, NMF, "nmf_tfidf_model.pkl", path='models')
+#nmf_tfid_model = get_recommendations_save_pickles(filtered_df, tfidf_vectorizer, NMF, "nmf_tfidf_model.pkl", path='models')
+#nmf_count_model = get_recommendations_save_pickles(filtered_df, count_vectorizer, NMF, "nmf_count_model.pkl", path='models')
+#svd_tfidf_model = get_recommendations_save_pickles(filtered_df, tfidf_vectorizer, TruncatedSVD,"svd_tfidf_model.pkl", path='models')
+#svd_count_model = get_recommendations_save_pickles(filtered_df, count_vectorizer,TruncatedSVD, "svd_count_model.pkl", path='models')
+
+#Load models and vectorizers trained in the recommendation system
+#tfidf_vec = get_vectorizer("tfidf_vectorizer.pkl", "models")
+#count_vec = get_vectorizer("count_vectorizer.pkl", "models")
+#nmf_tfidf = get_model("nmf_tfidf_model.pkl", "models")
+#nmf_count = get_model("nmf_count_model.pkl", "models")
+#svd_tfidf = get_model("svd_tfidf_model.pkl", "models")
+#svd_count = get_model("svd_count_model.pkl", "models")
