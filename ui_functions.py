@@ -69,10 +69,20 @@ def image_upload_and_prediction():
 
     if st.session_state.get('uploaded_image') is None:
         # st.session_state['clear_image_triggered'] = False
-        uploaded_image = st.file_uploader("Upload an Image (optional)", type=["jpg", "jpeg", "png"], key="image_uploader")
+        uploaded_image = st.file_uploader("Upload an Image (optional)", type=["jpg", "jpeg"], 
+                                          accept_multiple_files=False, key="image_uploader",
+                                          help="Limit 200MB per file • JPG, JPEG only")
         if uploaded_image is not None:
-            st.session_state['uploaded_image'] = uploaded_image
-            # st.session_state['clear_image_triggered'] = False  # Reset clear trigger
+            # Get the uploaded file's extension
+            file_extension = uploaded_image.name.split(".")[-1].lower()
+            
+            # check if the file extension is anything other than .jpg or .jpeg then display an error
+            if file_extension not in ["jpg", "jpeg"]:
+                st.error("Invalid file format. Please upload JPG or JPEG format only.")
+                st.stop()  # Stop further execution
+            else:
+                st.session_state['uploaded_image'] = uploaded_image
+                # st.session_state['clear_image_triggered'] = False  # Reset clear trigger
 
     # Display uploaded image if present in session state
     if st.session_state.get('uploaded_image') is not None:
