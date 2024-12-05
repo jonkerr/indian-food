@@ -14,7 +14,6 @@ conda activate Tasty_AI
 ```
 
 #### Data Sources
-* Indian_Food_Images : https://www.kaggle.com/code/harshghadiya/transfer-learning-models/input
 * Food_Classification: https://www.kaggle.com/datasets/l33tc0d3r/indian-food-classification?resource=download-directory
 
 

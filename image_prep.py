@@ -31,6 +31,13 @@ def get_label_mapping(path="data/pre_processed/mapping.pkl"):
 def remove_outliers(indf):
     """
     Borrowed some outlier detection from: https://www.kaggle.com/code/varsha300/transferlearning
+    
+    That said, I chose not to use image_size as an outlier as we resize all the images anyways, so this isn't very meaninful.
+    Instead, I filter on aspect ratio outliers, as we want to be cautious of images that are too tall or too wide, as they'll become compressed when resized to a square.
+    This approach yielded slightly better model performance.
+    
+    I also calculated all the z_scores before filtering anything out, as I wanted the full gamut of what "normal" looked like.  Filtering sequentially,
+    would leave it order dependent for z_scores and I didn't want to introduce that level of variability.
     """
     # Define a threshold for what we consider to be an outlier.
     # We select 3 as that should capture 99.7% of the variance.
@@ -38,19 +45,21 @@ def remove_outliers(indf):
         return df[~((df[col] > threshold) | (df[col] < -threshold))]
     df = indf.copy()
     
-    # read images
+    # read images in grayscale for laplacian (does't make a difference what color for aspect ratio..)
     df['image_gray'] = df.apply(lambda row: cv2.imread(row['path'], cv2.IMREAD_GRAYSCALE), axis=1)
     # remove rows with any non-images
     df = df.dropna(subset=['image_gray'])
 
-    # Filter image sizes based on zscore outliers
-    df['image_size'] = df.apply(lambda row: row['image_gray'].shape[0] * row['image_gray'].shape[1] , axis=1)
-    df['z_scores_size'] = zscore(df['image_size'])
-    df = z_filter(df, 'z_scores_size').copy()
+    # identify images that have an outlier image shape   
+    df['aspect_ratio'] = df.apply(lambda row: row['image_gray'].shape[1] / row['image_gray'].shape[0] , axis=1)
+    df['z_scores_aspect_ratio'] = zscore(df['aspect_ratio'])
 
     # Calculate z-scores for the image quality using Laplacian variance
     df['laplacian'] = df.apply(lambda row: cv2.Laplacian(row['image_gray'], cv2.CV_64F).var() , axis=1)
-    df['z_scores_laplacian'] = zscore(df['laplacian'])
+    df['z_scores_laplacian'] = zscore(df['laplacian'])    
+    
+    # filter out where zscore is outside of the acceptable threshold
+    df = z_filter(df, 'z_scores_aspect_ratio')    
     df = z_filter(df, 'z_scores_laplacian')    
     return df[['label','path']]
 

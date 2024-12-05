@@ -10,20 +10,20 @@ def train_image_generator():
     Abstract the params used in image generation
     """
     datagen = ImageDataGenerator(
-        rescale=1./255,        
-        rotation_range=40, 
-        zoom_range=0.2, 
+#        rescale=1./255,        
+        rotation_range=20, 
+        zoom_range=0.15, 
         width_shift_range=0.2, 
         height_shift_range=0.2, 
-        shear_range=0.2, 
+        shear_range=0.15, 
 #        brightness_range=0.1,
         horizontal_flip=True, 
         vertical_flip=True,
         fill_mode="nearest",
-        channel_shift_range=0.1,
+#        channel_shift_range=0.1,
     )    
     
-    return ImageDataGenerator(rotation_range=20, zoom_range=0.15, width_shift_range=0.2, height_shift_range=0.2, shear_range=0.15, horizontal_flip=True, fill_mode="nearest")
+ #   return ImageDataGenerator(rotation_range=20, zoom_range=0.15, width_shift_range=0.2, height_shift_range=0.2, shear_range=0.15, horizontal_flip=True, fill_mode="nearest")
     return datagen
     
 
