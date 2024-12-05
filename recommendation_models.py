@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import re
 from sklearn.decomposition import NMF
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -12,11 +13,31 @@ from gensim.models.coherencemodel import CoherenceModel
 processed_df = pd.read_pickle("data/processed_recipes.pkl")
 
 #Find dish name in recipes and filter them based on user preferences
-def filter_recipes (df, dish_name, cuisine=None, course=None, diet=None, prep_time=None, allergen_type=None, debug=False): 
-  
-    filtered_df = df[df['name'].str.contains(dish_name, case=False, na=False)]
-    print ((f"Number of found dishes before filtering : {filtered_df.shape[0]}"))
+def filter_recipes(df, dish_name, cuisine=None, course=None, diet=None, prep_time=None, allergen_type=None, debug=False):
+    # Escape special regex characters in the dish name
+    escaped_dish_name = re.escape(dish_name)
 
+    # Search for exact match of the joint name
+    joint_name_pattern = rf'\b{escaped_dish_name}\b'
+    filtered_df = df[df['name'].str.contains(joint_name_pattern, case=False, na=False, regex=True)]
+    if debug:
+        print(f"Number of dishes found with exact name '{dish_name}': {filtered_df.shape[0]}")
+    
+    # If no exact matches, search for exact match of individual words
+    if filtered_df.empty:
+        dish_name_parts = dish_name.split()
+        word_patterns = [rf'\b{re.escape(word)}\b' for word in dish_name_parts]
+        regex_pattern = '|'.join(word_patterns)  # Create regex to match any of the exact words
+        filtered_df = df[df['name'].str.contains(regex_pattern, case=False, na=False, regex=True)]
+        if debug:
+            print(f"Number of dishes found with individual exact words '{dish_name_parts}': {filtered_df.shape[0]}")
+    
+    # If still no results, return None
+    if filtered_df.empty:
+        print("No recipes found matching the dish name criteria.")
+        return None
+
+    # Apply additional filters based on user preferences
     if cuisine:
         filtered_df = filtered_df[filtered_df['cuisine'].str.lower() == cuisine.lower()]
     if course:
@@ -30,10 +51,13 @@ def filter_recipes (df, dish_name, cuisine=None, course=None, diet=None, prep_ti
         allergen_set = set(allergen_type)
         filtered_df = filtered_df[~filtered_df['allergen_type'].apply(lambda x: bool(set(x) & allergen_set))]
 
+    # Check the final filtered results
     if filtered_df.empty:
-        print("No recipes found matching the criteria.")
+        print("No recipes found matching the full criteria.")
         return None
-    print(f"Number of dishes after filtering: {filtered_df.shape[0]}")
+    
+    if debug:
+        print(f"Number of dishes after filtering: {filtered_df.shape[0]}")
     return filtered_df
 
 #Calculate the best number of topics using coherence score for the filtered dataframe
