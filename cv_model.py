@@ -19,6 +19,16 @@ def print_debug(*args, **kwargs):
     if DEBUG:
         print(*args, **kwargs)
     
+
+def get_keras_preprocessing():
+    """
+    Sometimes Jupyter kernels crash randomly after retrieving the EfficientNetV2L base model
+    This method will allow retrieval of just the appropriate preprocess_input
+    while still maintaining the abstraction to use the one corresponding with the keras base model used
+    """
+    from tensorflow.keras.applications.efficientnet_v2 import preprocess_input
+    return preprocess_input
+
     
 def get_keras_model():
     """
@@ -67,6 +77,7 @@ def get_tasty_model(base_model, num_classes):
     
 def get_empty_model(num_classes=20):
     empty_model = EfficientNetV2L(weights=None, include_top=False, input_tensor=Input(shape=(IMG_SIZE[0], IMG_SIZE[1], 3)))   
+    empty_model.trainable = False
     model = get_tasty_model(empty_model, num_classes)
     return model
 

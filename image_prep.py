@@ -168,7 +168,7 @@ def train_val_test_split(X,y,labels, test_size=0.1, val_size=0.1):
 
 
     
-def get_split_data(preprocess_input, model_name, image_path='data/Food_Classification/', pickle_path="data/pre_processed/"):   
+def get_split_data(preprocess_input, image_path='data/Food_Classification/', pickle_path="data/pre_processed/"):   
     """
     This method is the main entry point for getting test, train, and validation data.
     Cache prep in a pickle file to speed up multiple runs of this for testing    
