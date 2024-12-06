@@ -132,16 +132,19 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# VS Code
+.vscode
+
 # file resources
 hidden.py
 
 # Experiments
 scratch.py
-scratch.ipynb
+scratch*.ipynb
 ignore/
 delete/
 test_app/
-
+* copy*
 
 # hide image cache
 image_df.pkl.xz
