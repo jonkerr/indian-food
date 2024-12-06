@@ -91,6 +91,7 @@ def main():
                 st.write("No recipes match your filters.")
                 if st.button("Find Another Recipe"):
                     reset_session_state()
+                    # st.experimental_rerun()
                     
             else:
                 # Get recommendations using FeedbackRecommendationModel from feedback_reinf_learning_recommendation_model.py
@@ -138,6 +139,10 @@ def main():
                         if submitted:
                             if any(feedback != "Select" for feedback in st.session_state['feedback_dict'].values()):
                                 save_feedback_update_wt_refresh_screen()
+
+                            # after the feedback is saved and feedback file is saved with new weights, reset the session
+                            reset_session_state()
+                            # st.experimental_rerun()  # Ensure the UI refreshes completely
                     
                 else:
                     st.write("No recommendations available.")

@@ -14,6 +14,9 @@ def reset_session_state():
     """
     Reset all session state variables, including clearing the uploaded image.
     """
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+        
     st.session_state.clear()  # Clear all session state
     st.session_state['uploaded_image'] = None  # Clear uploaded image
     st.session_state['file_uploader_key'] = str(np.random.randint(1, 1e9))  # Reset file uploader with a unique key
@@ -40,16 +43,12 @@ def initialize_session_state():
         reset_session_state()
     if 'uploaded_image' not in st.session_state:
         st.session_state['uploaded_image'] = None
-        # reset_session_state()
     if 'clear_image_triggered' not in st.session_state:
         st.session_state['clear_image_triggered'] = True
-        # reset_session_state()
     if 'prediction_done' not in st.session_state:
         st.session_state['prediction_done'] = False
-        # reset_session_state()
     if 'selected_recipe' not in st.session_state:
         st.session_state['selected_recipe'] = "Select an option"
-        # reset_session_state()
 
 # Function to format dish names
 def format_dish_name(dish_name):
@@ -69,10 +68,20 @@ def image_upload_and_prediction():
 
     if st.session_state.get('uploaded_image') is None:
         # st.session_state['clear_image_triggered'] = False
-        uploaded_image = st.file_uploader("Upload an Image (optional)", type=["jpg", "jpeg", "png"], key="image_uploader")
+        uploaded_image = st.file_uploader("Upload an Image (optional)", type=["jpg", "jpeg"], 
+                                          accept_multiple_files=False, key="image_uploader",
+                                          help="Limit 200MB per file • JPG, JPEG only")
         if uploaded_image is not None:
-            st.session_state['uploaded_image'] = uploaded_image
-            # st.session_state['clear_image_triggered'] = False  # Reset clear trigger
+            # Get the uploaded file's extension
+            file_extension = uploaded_image.name.split(".")[-1].lower()
+            
+            # check if the file extension is anything other than .jpg or .jpeg then display an error
+            if file_extension not in ["jpg", "jpeg"]:
+                st.error("Invalid file format. Please upload JPG or JPEG format only.")
+                st.stop()  # Stop further execution
+            else:
+                st.session_state['uploaded_image'] = uploaded_image
+                # st.session_state['clear_image_triggered'] = False  # Reset clear trigger
 
     # Display uploaded image if present in session state
     if st.session_state.get('uploaded_image') is not None:
@@ -82,7 +91,10 @@ def image_upload_and_prediction():
 
         # Clear Image Button
         if st.button("Clear Image"):
+            print("Before reset:", st.session_state)  # Debug print
             reset_session_state()
+            print("After reset:", st.session_state)  # Debug print
+            # st.experimental_rerun()
 
         # Instructions for the button (to manage the bug)
         st.markdown(
@@ -104,6 +116,7 @@ def image_upload_and_prediction():
                 st.session_state['predicted_dish_name'] = formatted_name
                 st.session_state['unformatted_dish_name'] = unformatted_name
                 st.session_state['prediction_done'] = True
+                st.session_state["selected_recipe"] = "Select an option"  # Reset dropdown value
                 st.success(f"Predicted Dish Name: {formatted_name}")
             finally:
                 if os.path.exists(temp_image_path):
@@ -115,13 +128,10 @@ def dish_name_and_selection():
         format_dish_name(name)[0] for name in processed_df["name"].unique()
     ]
 
-    # Ensure dropdown uses the formatted predicted dish name
-    if st.session_state.get('reset_trigger', False):
-        st.session_state['selected_recipe'] = "Select an option"  # Reset state
-        st.session_state['reset_trigger'] = False  # Clear the reset trigger
+    # Dropdown is disabled only if a prediction is made
+    dropdown_disabled = st.session_state.get("prediction_done", False)
 
-    # Dropdown is disabled only if a prediction is made and not reset
-    dropdown_disabled = st.session_state['prediction_done'] and not st.session_state['reset_done']
+    # # Dropdown is disabled only if a prediction is made and not reset
     selected_recipe = st.selectbox(
         "Select a dish name",
         dish_options,
@@ -244,10 +254,8 @@ def save_feedback_update_wt_refresh_screen():
 
     # File path for the feedback file
     feedback_file_path = "models/user_feedback.json"
-
     # Ensure the file and directory exist
     os.makedirs(os.path.dirname(feedback_file_path), exist_ok=True)
-
     try:
         # Load existing feedback if the file exists
         with open(feedback_file_path, "r") as f:
@@ -255,18 +263,11 @@ def save_feedback_update_wt_refresh_screen():
     except FileNotFoundError:
         # If the file doesn't exist, initialize with an empty list
         existing_feedback = []
-
     # Append new feedback data
     existing_feedback.append(feedback_data)
-
     # Save updated feedback back to the file
     with open(feedback_file_path, "w") as f:
         json.dump(existing_feedback, f, indent=4)
 
-    # Update the model with the feedback
+    # Update the feedback model with the feedback
     feedback_model.update_weights(st.session_state['feedback_dict'])
-    
-    print("Session state before reset:", st.session_state)
-    # Reset everything, including the uploaded image
-    reset_session_state()
-    st.experimental_rerun()  # Ensure the UI refreshes completely
