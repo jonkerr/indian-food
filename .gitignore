@@ -137,11 +137,11 @@ hidden.py
 
 # Experiments
 scratch.py
-scratch.ipynb
+scratch*.ipynb
 ignore/
 delete/
 test_app/
-
+* copy*
 
 # hide image cache
 image_df.pkl.xz
