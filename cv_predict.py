@@ -2,19 +2,15 @@
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-import keras
+import tensorflow 
 import cv2
 import numpy as np
 from image_prep import get_label_mapping, IMG_SIZE
 from cv_model import get_empty_model
 
-# standardize on this for now
-import tensorflow as tf
-
 class TastyFoodPredictor():
     def __init__(self, 
                  preprocess_input_fn=None, 
-#                 keras_model_path = 'models/efficientnet_v2_20_84.64.keras', 
                  tflite_path='models/lite/efficientnet_v2_20_84.64.tflite', 
                  weights_path = 'models/weights/efficientnet_v2_20_84.64.hdf5', 
                  use_keras=False, use_tflite=True):
@@ -25,13 +21,13 @@ class TastyFoodPredictor():
         # load specific preprocess_input or use the default if not specified
         self.preprocess_input = preprocess_input_fn
         if preprocess_input_fn is None:
-            self.preprocess_input = tf.keras.applications.efficientnet_v2.preprocess_input
+            self.preprocess_input = tensorflow.keras.applications.efficientnet_v2.preprocess_input
             
         # we'll default to using TF Lite but still have the option to turn off
         self.use_tflite = use_tflite
         if use_tflite:
             # Load the TFLite model
-            self.interpreter = tf.lite.Interpreter(model_path=tflite_path)
+            self.interpreter = tensorflow.lite.Interpreter(model_path=tflite_path)
             self.interpreter.allocate_tensors()
 
             # Get input and output details
@@ -40,7 +36,6 @@ class TastyFoodPredictor():
             
         # only load keras model if asked as this is very expensive!!
         if use_keras:
-#            self.model = keras.models.load_model(keras_model_path)
             # load empty model
             self.model = get_empty_model()
             # load weights
@@ -68,8 +63,7 @@ class TastyFoodPredictor():
     
     
     def predict_batch(self, input_data, use_tflite=True):
-        if use_tflite:
-            
+        if use_tflite:            
             # got weird shape errors when predicting a batch of records.  
             # Found a workaround here:
             # https://heartbeat.comet.ml/running-tensorflow-lite-image-classification-models-in-python-92ef44b4cd47 
@@ -90,14 +84,12 @@ class TastyFoodPredictor():
             
         return preds_out
 
-
     
     
 def health_check():       
     print('starting health check')
     test_image = 'data/Food_Classification/chole_bhature/002.jpg'
     # confirm key files exist
-    import os
     import sys
     
     if os.path.exists(test_image):
