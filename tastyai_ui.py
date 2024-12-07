@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import json
 from recommendation_models import filter_recipes
 from feedback_reinf_learn_recommendation_model import FeedbackRecommendationModel
 from save_user_feedback import save_feedback
@@ -117,7 +118,7 @@ def main():
 
                     # Initialize feedback storage in session state
                     if 'feedback_dict' not in st.session_state:
-                        st.session_state['feedback_dict'] = {row.Index: "Select" for row in recommended_recipes.itertuples()}
+                        st.session_state['feedback_dict'] = {row.Index: "Helpful" for row in recommended_recipes.itertuples()}
                         print("Initialized Feedback Dict:", st.session_state['feedback_dict'])
 
                     # Create a form to group feedback and submission together
@@ -164,17 +165,17 @@ def main():
                             print(feedback_key)
                             selected_feedback = st.radio(
                                 f"Was this recipe helpful? (Recipe {display_index})",
-                                options=["Select", "Helpful", "Not Related"],
+                                options=["Helpful", "Not Helpful"],
                                 index=0,
-                                key=feedback_key
+                                key=f"feedback_{row.Index}"
                             )
-                            # if selected_feedback != "Select":
-                            #     st.session_state['feedback_dict'][row.Index] = selected_feedback
-                            #     print(f"Feedback Captured: {row.name} -> {selected_feedback}")
+                            # # Update feedback_dict dynamically
+                            st.session_state['feedback_dict'][row.Index] = selected_feedback
+                            print(f"Feedback Captured: {row.name} -> {selected_feedback}")
                             
-                            st.write("---")  # Separator between recipes
-
                             print(selected_feedback)
+
+                            st.write("---")  # Separator between recipes
 
                         # Update feedback_dict only if feedback is not "Select"
                         # if selected_feedback != "Select":
@@ -188,16 +189,18 @@ def main():
 
                         # Submit all feedback button
                         # submitted = st.form_submit_button("Submit feedback and/or find another Recipe")
+                        print("Session State Values before form submission:", st.session_state)
                         st.form_submit_button("Submit feedback and/or find another Recipe")
                         # print("Form Submitted State:", submitted)
                         print("Feedback Dict Values before submit button is clicked:", st.session_state['feedback_dict'])
 
 
-                    # if user clicks on "Submit feedback and/or find another Recipe" button
-                    # process feedback and save it in a json file and 
-                    # update the weights of the feedback
-                    # refresh the screen
-                    if st.form_submit_button:
+                        # if user clicks on "Submit feedback and/or find another Recipe" button
+                        # process feedback and save it in a json file and 
+                        # update the weights of the feedback
+                        # refresh the screen
+                    if st.form_submit_button("Submit feedback and/or find another Recipe"):
+                        print("Session State Values after form submission:", st.session_state)
                         print("Form Submitted:", st.form_submit_button)
                         print("Feedback Dict Values after submit button while processing/saving:", st.session_state['feedback_dict'])
 
@@ -205,56 +208,62 @@ def main():
                         for row in recommended_recipes.itertuples():
                             feedback_key = f"feedback_{row.Index}"
                             selected_feedback = st.session_state.get(feedback_key, "Select")
+                            print(selected_feedback)
                             if selected_feedback != "Select":
+                                print(selected_feedback)
                                 st.session_state['feedback_dict'][row.Index] = selected_feedback
 
-                        print("Updated Feedback Dict:", st.session_state['feedback_dict'])
+                            print("Updated Feedback Dict:", st.session_state['feedback_dict'])
                         
                         # if feedback is not empty then save
-                        if any(feedback != "Select" for feedback in st.session_state['feedback_dict'].values()):
-                            print("Saving feedback...")
-                            # save_feedback_update_wt_refresh_screen(user_inputs, recommended_recipes, feedback_model)
-                            # if not st.session_state.get('feedback_dict'):
-                            #     print("No feedback to save.")
-                            #     return
-                                
-                            feedback_data = {
-                                "user_inputs": user_inputs,
-                                "feedback": st.session_state['feedback_dict'],
-                                "recommendations": recommended_recipes.to_dict(orient="records")
-                            }
-
-                            print("Feedback Data to Save:", feedback_data)  # Debugging step
+                        # if any(feedback != "Select" for feedback in st.session_state['feedback_dict'].values()):
+                        print("Saving feedback...")
+                        # save_feedback_update_wt_refresh_screen(user_inputs, recommended_recipes, feedback_model)
+                        # if not st.session_state.get('feedback_dict'):
+                        #     print("No feedback to save.")
+                        #     return
                             
-                            # File path for the feedback file
-                            feedback_file_path = "models/user_feedback.json"
-                            # Ensure the file and directory exist
-                            os.makedirs(os.path.dirname(feedback_file_path), exist_ok=True)
-                            try:
-                                # Load existing feedback if the file exists
-                                with open(feedback_file_path, "r") as f:
-                                    existing_feedback = json.load(f)
-                            except FileNotFoundError:
-                                # If the file doesn't exist, initialize with an empty list
-                                existing_feedback = []
-                            
-                            print("Existing Feedback Before Append:", existing_feedback)  # Debugging step
-                            
-                            # Append new feedback data
-                            existing_feedback.append(feedback_data)
-                            # Save updated feedback back to the file
-                            with open(feedback_file_path, "w") as f:
-                                json.dump(existing_feedback, f, indent=4)
+                        feedback_data = {
+                            "user_inputs": user_inputs,
+                            "feedback": st.session_state['feedback_dict'],
+                            "recommendations": recommended_recipes.to_dict(orient="records")
+                        }
 
-                            print("Feedback Saved Successfully:", existing_feedback)  # Debugging step
+                        print("Feedback Data to Save:", feedback_data)  # Debugging step
+                        
+                        # File path for the feedback file
+                        feedback_file_path = "models/user_feedback.json"
+                        # Ensure the file and directory exist
+                        os.makedirs(os.path.dirname(feedback_file_path), exist_ok=True)
+                        try:
+                            # Load existing feedback if the file exists
+                            print('inside try')
+                            with open(feedback_file_path, "r") as f:
+                                existing_feedback = json.load(f)
+                        except FileNotFoundError:
+                            print('inside except')
+                            # If the file doesn't exist, initialize with an empty list
+                            existing_feedback = []
+                        
+                        print("Existing Feedback Before Append:", existing_feedback)  # Debugging step
+                        
+                        # Append new feedback data
+                        existing_feedback.append(feedback_data)
+                        # Save updated feedback back to the file
+                        with open(feedback_file_path, "w") as f:
+                            print('Save updated feedback back to the file')
+                            json.dump(existing_feedback, f, indent=4)
 
-                            # Update the feedback model with the feedback
-                            feedback_model.update_weights(st.session_state['feedback_dict'])
-                            st.session_state['feedback_dict'] = {}  # Clear feedback dictionary
-                            st.success("Feedback submitted successfully!")
+                        print("Feedback Saved Successfully:", existing_feedback)  # Debugging step
+
+                        # Update the feedback model with the feedback
+                        print('Update the feedback model with the feedback')
+                        feedback_model.update_weights(st.session_state['feedback_dict'])
+                        st.success("Feedback submitted successfully!")
 
                         # after the feedback is saved and feedback file is saved with new weights, reset the session
                         reset_session_state()
+                        st.session_state['feedback_dict'] = {}  # Clear feedback dictionary
                         # st.experimental_rerun()  # Ensure the UI refreshes completely
                     # # after the feedback is saved and feedback file is saved with new weights, reset the session
                     # reset_session_state()
