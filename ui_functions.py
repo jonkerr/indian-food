@@ -5,6 +5,7 @@ import pandas as pd
 from PIL import Image
 import tempfile
 import os
+import json
 from cv_predict import TastyFoodPredictor
 
 processed_df = pd.read_pickle("data/processed_recipes.pkl")
