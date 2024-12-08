@@ -104,7 +104,15 @@ def compute_coherence_scores(filtered_df, vectorizer, model, min_topics=2, max_t
     return best_num_topics
 
 #Train the recommendation model using topic models and vectorizers
-def get_recommendations(filtered_df, vectorizer, model, num_recommendations=5):
+def get_recommendations(filtered_df, vectorizer, model, num_recommendations=5): 
+    # Handle the case with only one dish in the filtered DataFrame
+    if len(filtered_df) == 1:
+        filtered_df = filtered_df.copy()
+        filtered_df['similarity_score'] = ["100.00%"]  # Single dish is perfectly similar to itself
+        #print("\nOnly one dish in the filtered DataFrame. Returning it as the recommendation.\n")
+        return filtered_df[['name', 'similarity_score', 'cleaned_ingredients', 'cuisine', 
+                            'course', 'diet', 'allergens', 'prep_time', 'instructions']]
+    
     # Compute the optimal number of topics
     best_num_topics = compute_coherence_scores(filtered_df, vectorizer, model)
 
