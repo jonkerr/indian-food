@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import re
-import concurrent.futures
 from sklearn.decomposition import NMF
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -203,17 +202,9 @@ def compare_recommendation_models(filtered_df):
     results = []
     all_recommendations = {}
 
-    results_dct = {}
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        # submit multi-threaded job
-        futures = {name: executor.submit(func, filtered_df) for name,func in model_functions.items()}    
-        # collect results from each thread
-        results_dct = {name: t.result() for name, t in futures.items()}
-
-    for model_name, recommended_recipes in results_dct.items():
-#    for model_name, model_func in model_functions.items():
+    for model_name, model_func in model_functions.items():
         # Get recommendations using the model
-#        recommended_recipes = model_func(filtered_df)
+        recommended_recipes = model_func(filtered_df)
 
          # Store the recommendations for the current model
         all_recommendations[model_name] = recommended_recipes
