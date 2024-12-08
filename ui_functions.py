@@ -269,16 +269,6 @@ def display_feedback_options_and_store_feedback_on_click(row, user_inputs):
 
     feedback_key = f"feedback_{row.Index}"
 
-    # Displaying options for feedback selection
-    # selected_feedback = st.radio(
-    #     f"Was this recipe helpful?",
-    #     options=["Select", "Helpful", "Not Related"],
-    #     index=0, # Default selection is "Select"
-    #     key=feedback_key
-    # )
-
-    # print(selected_feedback)
-
     feedback_options = ["Yes", "No"]
     fbIndex = f"fb_{row.Index}"
     st.session_state[fbIndex] = None
@@ -290,21 +280,6 @@ def display_feedback_options_and_store_feedback_on_click(row, user_inputs):
         on_change=on_click_extract_feedback_to_dict,
         args=(row, user_inputs)
     )
-
-    # Update feedback_dict only if feedback is not "Select"
-    # if selected_feedback != "Select":
-    #     feedback_key = f"feedback_{row.Index}"
-    #     selected_feedback = st.session_state.get(feedback_key, "Select")
-    #     if 'feedback_dict' not in st.session_state:
-    #         st.session_state['feedback_dict'] = {}
-    #     st.session_state['feedback_dict'][row.Index] = selected_feedback
-
-    # # Update feedback_dict only if feedback is not "Select"
-    # if selected_feedback != "Select":
-    #     if 'feedback_dict' not in st.session_state:
-    #         st.session_state['feedback_dict'] = {}
-    #     st.session_state['feedback_dict'][row.Index] = selected_feedback
-    #     print(f"Feedback Dict Updated for {row.name} ({row.Index}):", st.session_state['feedback_dict'])
 
 # if user clicks on "Submit feedback and/or find another Recipe" button
 # process feedback and save it in a json file and refresh the screen
