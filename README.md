@@ -16,9 +16,24 @@ conda activate Tasty_AI
 ```
 
 ## Application
-### Data Sources
-* Food_Classification: https://www.kaggle.com/datasets/l33tc0d3r/indian-food-classification?resource=download-directory
 
+The application is a streamlit application.  To run, execute the following command:
+```
+streamlit run tastyai_ui.py
+```
+
+
+### Data Sources
+
+**Data Access**
+All external data sources are open datasets, found on Kaggle.
+
+**Food_Classification**
+* https://www.kaggle.com/datasets/l33tc0d3r/indian-food-classification?resource=download-directory
+
+**Recipe data**
+ * https://www.kaggle.com/code/cardata/indian-food-cuisine-data-analysis/input
+ * https://www.kaggle.com/code/amankumar2002/image-to-recipe/input
 
 
 ### Modules 
