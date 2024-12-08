@@ -5,6 +5,7 @@ import json
 import pandas as pd
 from recommendation_models import compare_recommendation_models
 
+
 class FeedbackRecommendationModel:
     # initiating feedback model
     def __init__(self, recipe_data, feedback_file="models/user_feedback.json"):

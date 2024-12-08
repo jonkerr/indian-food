@@ -207,5 +207,24 @@
                 "similarity_score": 0.0
             }
         ]
+    },
+    {
+        "user_inputs": {
+            "dish_name": "Cabbage And Carrot Thoran Recipe",
+            "selected_cuisine": "Select an option",
+            "selected_course": "Select an option",
+            "selected_diet_type": "Select an option",
+            "selected_prep_time": "Select an option",
+            "selected_allergies": []
+        },
+        "feedback": {
+            "5": "Yes"
+        },
+        "recommendations": [
+            {
+                "name": "Cabbage And Carrot Thoran Recipe",
+                "similarity_score": "100.00%"
+            }
+        ]
     }
 ]

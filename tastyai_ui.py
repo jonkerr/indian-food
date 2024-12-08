@@ -14,6 +14,7 @@ from ui_functions import (reset_session_state, format_dish_name, initialize_sess
                         save_feedback_update_wt_refresh_screen
 )
 
+
 def main():
     # Load DataFrames from pickle files
     processed_df = pd.read_pickle("data/processed_recipes.pkl")
