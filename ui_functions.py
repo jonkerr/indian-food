@@ -329,7 +329,7 @@ def save_feedback_update_wt_refresh_screen(row, user_inputs):
             "recommendations": filtered_recommendations
         }
 
-        print("Filtered Feedback Data to Save:", feedback_data)  # Debugging step
+        # print("Filtered Feedback Data to Save:", feedback_data)  # Debugging step
         
         # File path for the feedback file
         feedback_file_path = "models/user_feedback.json"
@@ -343,7 +343,7 @@ def save_feedback_update_wt_refresh_screen(row, user_inputs):
             # If the file doesn't exist, initialize with an empty list
             existing_feedback = []
         
-        print("Existing Feedback Before Append:", existing_feedback)  # Debugging step
+        # print("Existing Feedback Before Append:", existing_feedback)  # Debugging step
         
         # Append new feedback data
         existing_feedback.append(feedback_data)
@@ -351,7 +351,7 @@ def save_feedback_update_wt_refresh_screen(row, user_inputs):
         with open(feedback_file_path, "w") as f:
             json.dump(existing_feedback, f, indent=4)
 
-        print("Feedback Saved Successfully:", existing_feedback)  # Debugging step
+        print("Feedback Saved Successfully:")  # Debugging step
 
     # # Update the feedback model with the feedback
     # feedback_model.update_weights(st.session_state['feedback_dict'])
