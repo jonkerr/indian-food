@@ -207,5 +207,24 @@
                 "similarity_score": 0.0
             }
         ]
+    },
+    {
+        "user_inputs": {
+            "dish_name": "masala dosa",
+            "selected_cuisine": "Select an option",
+            "selected_course": "Select an option",
+            "selected_diet_type": "Select an option",
+            "selected_prep_time": "Select an option",
+            "selected_allergies": []
+        },
+        "feedback": {
+            "4": "Yes"
+        },
+        "recommendations": [
+            {
+                "name": "Kollu Masala Dosa Recipe - High Protein Horse Gram Dosa",
+                "similarity_score": 0.0
+            }
+        ]
     }
 ]
