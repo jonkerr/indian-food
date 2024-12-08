@@ -10,13 +10,37 @@ class FeedbackRecommendationModel:
     def __init__(self, recipe_data, feedback_file="models/user_feedback.json"):
         self.recipe_data = recipe_data
         self.feedback_file = feedback_file
-        # Ensure the feedback file exists
+        # checking if the feedback file exists, if not create a file 
         os.makedirs(os.path.dirname(self.feedback_file), exist_ok=True)
         if not os.path.exists(self.feedback_file):
             with open(self.feedback_file, "w") as f:
                 json.dump([], f)
 
-    # function to load feedback data to the json file "user_feedback.json" under models folder
+    # #function to update the weight based on user feedback:
+    # def update_weights(self, feedback_dict):
+    #     """
+    #     Update the feedback model by appending the feedback_dict to the feedback file.
+    #     Args:
+    #         feedback_dict (dict): A dictionary containing recipe IDs and their respective feedback 
+    #                             (e.g., {recipe_id: "helpful"}).
+    #     """
+    #     if not feedback_dict:
+    #         print("No feedback to update.")
+    #         return
+
+    #     # Load existing feedback
+    #     existing_feedback = self.load_feedback()
+
+    #     # Append the new feedback
+    #     existing_feedback.append({"feedback": feedback_dict})
+
+    #     # Save the updated feedback back to the file
+    #     with open(self.feedback_file, "w") as f:
+    #         json.dump(existing_feedback, f, indent=4)
+
+    #     print("Updated Feedback Model Successfully.")
+
+    # function to load feedback data from the json file "user_feedback.json" under models folder
     def load_feedback(self):
         """Load feedback data from the feedback file."""
         try:
@@ -38,29 +62,21 @@ class FeedbackRecommendationModel:
             if all(
                 entry_user_inputs.get(key) == user_inputs.get(key)
                 for key in user_inputs.keys()
-                if user_inputs[key] != "Select an option"
+                if user_inputs[key] != "Select"
             ):
                 relevant_feedback.append(feedback_entry["feedback"])
 
-        # Initialize weight adjustment for all recipe IDs
+        # Initializing weight adjustment for all recipe IDs/name
         recommendations["weight_adjustment"] = 0
 
-        # Process relevant feedback and compute average adjustments
-        adjustment_dict = {}
+        # Processing relevant feedback 
         for feedback_dict in relevant_feedback:
             for recipe_id, feedback in feedback_dict.items():
-                if recipe_id not in adjustment_dict:
-                    adjustment_dict[recipe_id] = []
-                if feedback == "helpful":
-                    adjustment_dict[recipe_id].append(1)
-                elif feedback == "not_related":
-                    adjustment_dict[recipe_id].append(-1)
-
-        # Assign average weight adjustment for each recipe ID
-        for recipe_id, adjustments in adjustment_dict.items():
-            if recipe_id in recommendations.index:
-                avg_adjustment = np.mean(adjustments)
-                recommendations.loc[recipe_id, "weight_adjustment"] = avg_adjustment
+                if recipe_id in recommendations.index:
+                    if feedback == "helpful":
+                        recommendations.loc[recipe_id, "weight_adjustment"] += 1
+                    elif feedback == "not_helpful":
+                        recommendations.loc[recipe_id, "weight_adjustment"] -= 1
 
         return recommendations
 
@@ -86,9 +102,9 @@ class FeedbackRecommendationModel:
         # Calculate the final score
         recommendations["final_score"] = recommendations["similarity_score"] + recommendations["weight_adjustment"]
 
-        # Sort by the final score and remove duplicates
+        # Sort by the final score
         recommendations = recommendations.sort_values(by="final_score", ascending=False)
-        recommendations = recommendations.drop_duplicates(subset="name", keep="first").reset_index(drop=True)
+        # recommendations = recommendations.drop_duplicates(subset="name", keep="first").reset_index(drop=True)
 
         return recommendations
     
@@ -118,6 +134,6 @@ class FeedbackRecommendationModel:
             print('no feedback for user inputs, displaying as is')
             return recommendations
 
-        # Step 4: Update weights based on feedback and return recommendations
+        # Step 4: Update weights based on existing feedback and return recommendations
         recommendations = self.update_weights_with_feedback(recommendations, user_inputs)
         return recommendations
