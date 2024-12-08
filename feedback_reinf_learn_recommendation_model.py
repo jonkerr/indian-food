@@ -52,31 +52,42 @@ class FeedbackRecommendationModel:
     # this function aggregates the feedback for the user selected options from feedback data
     def aggregate_feedback(self, recommendations, feedback_data, user_inputs):
         """
-        Aggregate feedback across multiple entries for the same recipe ID 
+        Aggregate feedback across multiple entries for the same recipe name 
         and match feedback based on user-given optional parameters.
         """
         # Filter feedback entries that match the current user inputs
         relevant_feedback = []
         for feedback_entry in feedback_data:
+            print(feedback_entry)
             entry_user_inputs = feedback_entry.get("user_inputs", {})
+            print(entry_user_inputs)
             if all(
-                entry_user_inputs.get(key) == user_inputs.get(key)
+                entry_user_inputs.get(key) == user_inputs.get(key, "").lower()
                 for key in user_inputs.keys()
                 if user_inputs[key] != "Select"
             ):
                 relevant_feedback.append(feedback_entry["feedback"])
+                print('entry input key', entry_user_inputs.get(key))
+                print('user inpur key', user_inputs.get(key, "").lower())
+
+        print(relevant_feedback)
 
         # Initializing weight adjustment for all recipe IDs/name
         recommendations["weight_adjustment"] = 0
 
         # Processing relevant feedback 
         for feedback_dict in relevant_feedback:
-            for recipe_id, feedback in feedback_dict.items():
-                if recipe_id in recommendations.index:
+            for recipe_name, feedback in feedback_dict.items():
+                print(recipe_name)
+                recipe_name = recipe_name.strip().lower()  # Standardize for matching
+                print(recipe_name)
+                if recipe_name in recommendations["name"].str.lower().values:
                     if feedback == "Yes":
-                        recommendations.loc[recipe_id, "weight_adjustment"] += 1
+                        recommendations.loc[recommendations["name"].str.lower() == recipe_name, "weight_adjustment"] += 1
                     elif feedback == "No":
-                        recommendations.loc[recipe_id, "weight_adjustment"] -= 1
+                        recommendations.loc[recommendations["name"].str.lower() == recipe_name, "weight_adjustment"] -= 1
+
+        print(recommendations)
 
         return recommendations
 
@@ -96,12 +107,13 @@ class FeedbackRecommendationModel:
             recommendations["similarity_score"], errors="coerce"
         ).fillna(0)
 
-        # Aggregate feedback adjustments and update recommendations
+        # Aggregate feedback adjustments and get weights using feedback data
         recommendations = self.aggregate_feedback(recommendations, feedback_data, user_inputs)
 
-        # Calculate the final score
-        recommendations["final_score"] = recommendations["similarity_score"] + recommendations["weight_adjustment"]
+        print("Weight aggregated for the feedback Applied:\n", recommendations[["name", "weight_adjustment"]])
 
+        # Calculate the final score
+        recommendations["final_score"] = recommendations["similarity_score"] * 0.7 + recommendations["weight_adjustment"] * 0.3
         # Sort by the final score
         recommendations = recommendations.sort_values(by="final_score", ascending=False)
         recommendations = recommendations.drop_duplicates(subset="name", keep="first").reset_index(drop=True)
