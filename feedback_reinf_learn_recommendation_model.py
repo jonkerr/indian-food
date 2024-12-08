@@ -73,9 +73,9 @@ class FeedbackRecommendationModel:
         for feedback_dict in relevant_feedback:
             for recipe_id, feedback in feedback_dict.items():
                 if recipe_id in recommendations.index:
-                    if feedback == "helpful":
+                    if feedback == "Yes":
                         recommendations.loc[recipe_id, "weight_adjustment"] += 1
-                    elif feedback == "not_helpful":
+                    elif feedback == "No":
                         recommendations.loc[recipe_id, "weight_adjustment"] -= 1
 
         return recommendations
@@ -104,7 +104,7 @@ class FeedbackRecommendationModel:
 
         # Sort by the final score
         recommendations = recommendations.sort_values(by="final_score", ascending=False)
-        # recommendations = recommendations.drop_duplicates(subset="name", keep="first").reset_index(drop=True)
+        recommendations = recommendations.drop_duplicates(subset="name", keep="first").reset_index(drop=True)
 
         return recommendations
     

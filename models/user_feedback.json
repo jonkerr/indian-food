@@ -1,6 +1,25 @@
 [
     {
         "user_inputs": {
+            "dish_name": "Fish Tandoori Recipe",
+            "selected_cuisine": "Select an option",
+            "selected_course": "Select an option",
+            "selected_diet_type": "Select an option",
+            "selected_prep_time": "Select an option",
+            "selected_allergies": []
+        },
+        "feedback": {
+            "1": "Yes"
+        },
+        "recommendations": [
+            {
+                "name": "Fish Tandoori Recipe",
+                "similarity_score": "100.00%"
+            }
+        ]
+    },
+    {
+        "user_inputs": {
             "dish_name": "samosa",
             "selected_cuisine": "Select an option",
             "selected_course": "Select an option",
@@ -9,170 +28,12 @@
             "selected_allergies": []
         },
         "feedback": {
-            "8646": "Helpful",
-            "5432": "Helpful",
-            "8459": "Helpful",
-            "5999": "Helpful",
-            "7283": "Helpful"
+            "4": "Yes"
         },
         "recommendations": [
             {
-                "name": "Gluten Free Samosa Recipe",
-                "similarity_score": "100.00%",
-                "cleaned_ingredients": [
-                    "potato aloo",
-                    "cumin seeds jeera",
-                    "onion",
-                    "green peas matar",
-                    "butter",
-                    "rice paper roll",
-                    "garam masala powder",
-                    "salt"
-                ],
-                "cuisine": "Indian",
-                "course": "Snack",
-                "diet": "Vegetarian",
-                "allergens": [
-                    "butter"
-                ],
-                "prep_time": 55.0,
-                "instructions": "To begin making the Gluten Free Samosa recipe, peel, dice and boil the potatoes. Mash the potatoes and keep it aside in a bowl., Heat up butter in a pan and splutter the cumin seeds and then fry the diced onions. Cook till the onions are soft and translucent., Add the cooked onion and spices, salt to the potatoes. Mix until well blended., Add the boiled peas into the potato and keep it aside.\\xa0Preheat your oven to 425 F., Fill a large bowl 1/4 full with water. Place the rice paper into the water one sheet at a time. Soak for 1-2 minutes\\xa0 until it becomes soft., Place the softened rice paper onto the counter and place 1- 2 tablespoon of potato mixture onto the center. Fold the bottom up first, then fold the sides in, fold the top down last. Follow the same steps for all the samosa.\\xa0Place onto a well-oiled pan, brush the samosa with oil as well., Bake them for 20 to 25 minutes turning a few times throughout. Serve hot., Serve\\xa0Gluten Free Samosa along with\\xa0Dhaniya Pudina Chutney\\xa0and\\xa0Masala Chai\\xa0or your tea break."
-            },
-            {
-                "name": "Punjabi Samosa Recipe - A Spiced Potato Tea Time Snack ",
-                "similarity_score": "100.00%",
-                "cleaned_ingredients": [
-                    "purpose flour maida",
-                    "ghee",
-                    "ajwain carom seed",
-                    "salt",
-                    "oil",
-                    "potato aloo",
-                    "green peas matar",
-                    "peanut moongphali",
-                    "ginger",
-                    "cumin seeds jeera",
-                    "fennel seed saunf",
-                    "turmeric powder haldi",
-                    "garam masala powder",
-                    "red chilli powder",
-                    "chaat masala powder",
-                    "amchur dry mango powder",
-                    "black",
-                    "salt kala namak",
-                    "salt",
-                    "coriander dhania"
-                ],
-                "cuisine": "North Indian",
-                "course": "Snack",
-                "diet": "Vegetarian",
-                "allergens": [
-                    "peanut"
-                ],
-                "prep_time": 60.0,
-                "instructions": "To begin making the Punjabi Samosa Recipe, keep all the ingredients prepped and ready., Method for the crust, Combine the flour, salt, ajwain and oil until the flour resembles coarse crumbs. Make a well in the centre and add water little at a time and knead well for five minutes to make firm dough., Cover the dough and allow it to rest for 20 minutes. Knead it once again and divide the dough into 10 to 12 portions and keep the portions covered to prevent them from drying., Method for the filling, Heat one teaspoon of oil in a pan; add the cumin seeds and allow it to crackle., On low heat add the ginger and turmeric powder; after a few seconds add the potatoes, fennel seeds, garam masala, chaat masala, red chilli powder, amchur powder, black salt and regular salt., Gently toss them so the potatoes get evenly coated with the spices., Stir for 3-4 minutes on low flame and finally add the peas, peanuts and coriander leaves\\xa0 and combine it with the potato mixture. Set aside to cool., Fill a small cup with water and keep aside; this will be used for sealing the edges of the cone., On a floured surface, roll each portion into a 6 inch diameter circle and cut each circle into half., Spread the water lightly all along the edge of the semicircle., Fold the semicircle into a cone shape and seal the side edges and not the opening of the cone., Pick the cone up in your hands and fill the cone with one or two tablespoons of potato filling., Press down the samosa filling gently into the cone with your fingers., Now close the top of this cone into a triangle shape, pinching the top edge so that it is completely sealed. Continue to make similar filled cones., Heat oil in a heavy bottomed pan for deep frying on medium heat; gently slip in a couple of samosas into the frying pan and allow them to fry on medium heat., Turn the samosas around in the oil once they come floating to the top., Fry them till they turn into a light golden-brown colour on all sides., Keep the heat on medium all along and ensure you fry the Samosas on medium heat and not on high heat., This will ensure the Samosa crust gets evenly cooked from the inside and perfectly crisp., High heat can brown the crust faster but not make the crust crispier. Continue the procedure with the remaining filled cones and drain the Samosas on absorbent paper., Serve the Samosas with\\xa0Mint Chutney\\xa0and\\xa0Date Tamarind Chutney\\xa0as a tea time snack or appetizer for your parties."
-            },
-            {
-                "name": "Soya Granule Samosa Recipe - Perfect Evening Snack",
-                "similarity_score": "99.96%",
-                "cleaned_ingredients": [
-                    "purpose flour maida",
-                    "whole wheat flour",
-                    "salt",
-                    "ghee",
-                    "ajwain carom seed",
-                    "water",
-                    "soy granule",
-                    "onion",
-                    "green chilli",
-                    "green peas matar",
-                    "cumin seeds jeera",
-                    "oil",
-                    "ginger garlic paste",
-                    "coriander powder dhania",
-                    "red chilli powder",
-                    "turmeric powder haldi",
-                    "garam masala powder",
-                    "sugar",
-                    "salt",
-                    "oil"
-                ],
-                "cuisine": "North Indian",
-                "course": "Snack",
-                "diet": "Vegetarian",
-                "allergens": [
-                    "soya",
-                    "bread",
-                    "soy",
-                    "wheat"
-                ],
-                "prep_time": 90.0,
-                "instructions": "To begin with Soya Granule Samosa, add maida, wheat flour, salt, ghee and ajwain in a bowl. Mix all the ingredients until it resembles bread crumbs., Add water little at a time and knead the flour into a stiff dough. Cover it with damp cloth and let it rest for about 30 minutes., The next step is to prepare the filling for the Soy Granule Samosa Recipe. Bring 2 cups of water to boil and add 1 teaspoon salt and soya granules into hot water. Let the soy granules submerge fully and rest in hot water for about 12 to 15 minutes., Once soaked and soft, drain the water and keep the soya granules aside. If using fresh green peas, blanch them until they get cooked. Drain and keep aside., Heat a tablespoon of oil in a pan. Add cumin seeds and wait till they splutter. Add finely chopped onions and green chilies and cook till onions turn soft., Add ginger garlic paste and cook till the raw smell of the paste goes off., Add cumin powder, turmeric powder, red chili powder, coriander powder and salt, mix well cook for about 15 seconds., Add soya granules and green peas, mix well, simmer and let it cook for 10 minutes in its own juices., Turn off the heat and let the filling cool down completely., Now, knead the dough once again and divide into 6 equal portions. Take a portion, and roll out a portion of dough into 6 to 7 inch diameter circle. Using a sharp knife, cut the circle into 2., Take a portion of the samosa dough, join the edges to make a cone. Add a 1 or 2 tablespoons of the soya granule samosa filling in the centre. Apply water on the edges to seal the samosa cone. Seal the edges tight and repeat the same process with the remaining dough and make the samosas., Heat oil in a deep fry pan for frying. Once oil turns hot, reduce the flame to medium and drop 2 to 3 samosas at a time and fry until golden brown on all the sides. Drain on absorbent paper., Give this delicious and crispy Soya Granule Samosa a try for an evening snack and serve it along with\\xa0Lehsun Pudina Chutney\\xa0and\\xa0\\xa0Gulkand Chai\\xa0as an appetizer for Indian Dinner Parties., You can also make this Soya Granule Samosa for the festival of Holi or even Diwali when you have friends and family over for dinner or a chai party."
-            },
-            {
-                "name": "Tandoori Paneer Samosa Recipe - With Baked Option",
-                "similarity_score": "99.93%",
-                "cleaned_ingredients": [
-                    "purpose flour maida",
-                    "salt",
-                    "water",
-                    "oil",
-                    "onion",
-                    "green bell pepper capsicum",
-                    "red chilli powder",
-                    "salt",
-                    "turmeric powder haldi",
-                    "cumin seeds jeera",
-                    "purpose flour maida",
-                    "paneer homemade cottage cheese",
-                    "curd dahi yogurt",
-                    "ginger garlic paste",
-                    "red chilli powder",
-                    "coriander powder dhania",
-                    "amchur dry mango powder",
-                    "black pepper powder",
-                    "garam masala powder",
-                    "turmeric powder haldi",
-                    "salt"
-                ],
-                "cuisine": "Indian",
-                "course": "Snack",
-                "diet": "Vegetarian",
-                "allergens": [
-                    "yogurt",
-                    "paneer"
-                ],
-                "prep_time": 220.0,
-                "instructions": "To begin making the Tandoori Paneer Samosa Recipe, first marinate paneer cubes in the ingredients mentioned under \"to marinate\"., Mix all spices till they are combined well. Now add in the cubed paneer and marinate it for about 2 hours., While the paneer is marinating we will make the pastry for the samosas., Into a bowl add the all purpose flour. Add oil and mix well till you get a sand like texture.\\xa0Add little water at a time and make a firm and yet smooth dough. Cover and keep aside., After marinating paneer for 2 hours take a grilling pan, add in a little oil and shallow fry the marinated paneer until crisp. Drain in a paper towel to remove the excess oil. Reserve the paneer marination., Now take a pan add in oil once it heats up add in cumin seeds and let them crackle. Once done and then add in the chopped onions and fry till they become glossy and translucent and then add in the chopped capsicum., Now add in 2 tablespoons of the masala used for marinating the paneer, mix well and then add in chilli powder and salt if required and the grilled paneer, Mix well to combine and cook till the filling is cooked through and no moisture remains. Once done turn off the heat. Now the filling for Tandoori Paneer Samosa is ready., Take 2 tablespoons maida in a bowl add in water and form a paste use this paste to seal the samosa edges. Heat oil for deep frying samosas., Pinch out a lemon sized ball from the dough and roll it out into a thin sheet of about 7 inch wide circle and with the help of a pizza cutter, divide the sheet into two semi circles. Repeat till all the dough is used up., \"Take the Samosa filling, place it on one semi circular dough sheet and roll it in the shape of the cone and seal the edges with the flour paste and apply light pressure to ensure filling doesnt ooze out.\", Once the oil is hot, deep fry the Tandoori Paneer Samosa until golden brown on a medium flame and then strain on an oil absorbent paper., Oven Method:\\xa0Instead of deep frying, the samosa can also be baked.\\xa0Preheat the oven at 180 Deg C for about 10 mins and then grill it for 180 deg C 20 mins. Flip the side and cook after 10 mins., Serve Tandoori Paneer Samosa with Green Chutney, Tamarind Chutney and Tomato Sauce along with a cup of Masala chai."
-            },
-            {
                 "name": "Matar Samosa Recipe -Green Pea Samosa",
-                "similarity_score": "99.88%",
-                "cleaned_ingredients": [
-                    "purpose flour maida",
-                    "ghee",
-                    "salt",
-                    "oil",
-                    "ghee",
-                    "cumin seeds jeera",
-                    "green chilli sauce",
-                    "cinnamon powder dalchini",
-                    "garam masala powder",
-                    "red chilli powder",
-                    "amchur dry mango powder",
-                    "green peas matar",
-                    "salt",
-                    "purpose flour maida",
-                    "water"
-                ],
-                "cuisine": "North Indian",
-                "course": "Snack",
-                "diet": "Vegetarian",
-                "allergens": [
-                    "bread"
-                ],
-                "prep_time": 55.0,
-                "instructions": "To begin making the Matar Samosa Recipe first, mix together half a teaspoon of salt into the flour. Rub ghee or vegetable shortening into the flour mixture, with your fingers until it resembles loose bread crumbs., Gradually add water, slowly, and knead to make a soft but firm dough. Roll the dough into a ball, cover with a moist muslin cloth and keep aside., The next step is to make the filling. In a kadai or heavy bottomed pan, warm the ghee, add the jeera and allow it to crackle and tip in the chilli paste. Saute these together for a minute., Add peas followed by all the other spices and cook till the pea mixture becomes dry and all the water has dried up. Season with salt and cook again for 2-3 minutes. Set the peas mixture aside to cool down so it is easier to handle when shaping the samosas., Make a flour paste, by combining the flour and water., To begin making the samosa cases, divide the dough into small balls and roll them into thin circles. Cut each rolled-out circle into two halves by running your knife down the center, so you have 2 semi-circles for each disc. Roll the semi-circles into cones and using a teaspoon fill them with the peas mixture., Dab the flour paste along the edges of the open side of the cone, press the two edges together and seal. Arrange the matar samosas in a platter and cover them with a moist muslin cloth., Heat oil for deep frying in a kadai on medium heat. Deep fry the matar samosas in hot oil till they are golden brown. Try not to fry too many together as it will crowd the kadai and alter the cooking time., Remove the Matar Samosa from the kadai using a slotted spoon and drain them on kitchen paper., Matar Samosa\\xa0 can be served with a dollop of\\xa0Dhaniya Pudina Chutney\\xa0and\\xa0khajoor imli chutney\\xa0or tomato ketchup, along with\\xa0masala chai\\xa0in the evening."
+                "similarity_score": 0.0
             }
         ]
     }

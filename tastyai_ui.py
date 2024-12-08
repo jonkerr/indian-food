@@ -10,7 +10,7 @@ from ui_functions import (reset_session_state, format_dish_name, initialize_sess
                         display_optional_parameters, filter_empty_option_and_df, 
                         # format_instructions,
                         format_recipe_details_and_display, 
-                        display_feedback_radio_button_and_store_feedback, 
+                        display_feedback_options_and_store_feedback_on_click, 
                         save_feedback_update_wt_refresh_screen
 )
 
@@ -79,7 +79,7 @@ def main():
         if st.session_state['selected_recipe'] == "Select an option" and not st.session_state['prediction_done']:
             st.error("Please upload an image or select a dish name.")
         else:
-            st.write("Fetching recommendations based on your input. It may take 3-7 minutes....")
+            st.write("Fetching recommendations based on your input. It may take couple of minutes (upto 7 mins.)....")
             # Use predicted dish name if no selection is made
             dish_name_to_use = (
                 st.session_state['unformatted_dish_name']
@@ -114,152 +114,51 @@ def main():
                 
                 # Initialize the feedback model
                 feedback_model = st.session_state['feedback_model']
-
-                recommended_recipes = feedback_model.get_weighted_recommendations(filtered_df, user_inputs)
-
-                if recommended_recipes is not None and not recommended_recipes.empty:
-                    st.write(f"Recommended Recipes ({len(recommended_recipes)} found):")
+                if 'stored_recommendations' not in st.session_state:
+                    st.session_state['stored_recommendations'] = feedback_model.get_weighted_recommendations(filtered_df, user_inputs)
+                
+                if st.session_state['stored_recommendations'] is not None and not st.session_state['stored_recommendations'].empty:                    
+                    st.write(f"Recommended Recipes ({len(st.session_state['stored_recommendations'])} found):")
 
                     # Initialize feedback storage in session state
                     if 'feedback_dict' not in st.session_state:
-                        st.session_state['feedback_dict'] = {row.Index: "Helpful" for row in recommended_recipes.itertuples()}
+                        st.session_state['feedback_dict'] = {row.Index: "Select" for row in st.session_state['stored_recommendations'].itertuples()}
                         # print("Initialized Feedback Dict:", st.session_state['feedback_dict'])
 
-                    # Create a form to group feedback and submission together
-                    with st.form("feedback_form"):
-                        # Iterate over all recommended recipes and display details
-                        for display_index, row in enumerate(recommended_recipes.itertuples(), start=1):
-                            st.write(f"Recipe {display_index} of {len(recommended_recipes)}")  #sequential numbering
+                    # VA *** May delete
+                    # def submit_feedback_vars():
+                    #     print("feedback button clicked")
 
-                            # Format the recipe details for display for each recipe
-                            format_recipe_details_and_display(row)
+                    # with st.form("feedback_form"):
 
-                            # ****************************
-                            # formatted_name, _ = format_dish_name(row.name)
-                            # st.markdown(f"### **{formatted_name}**")
+                    print("Stored Recommendations in Session State:", st.session_state.get('stored_recommendations'))
 
-                            # # Display recipe details
-                            # st.markdown(f"**<span style='color:blue;'>Cuisine:</span>** {row.cuisine}", unsafe_allow_html=True)
-                            # st.markdown(f"**<span style='color:blue;'>Course:</span>** {row.course}", unsafe_allow_html=True)
-                            # st.markdown(f"**<span style='color:blue;'>Diet Type:</span>** {row.diet}", unsafe_allow_html=True)
-                            # st.markdown(f"**<span style='color:blue;'>Preparation Time:</span>** {row.prep_time} minutes", unsafe_allow_html=True)
+                    # Iterate over all recommended recipes and display details
+                    for display_index, row in enumerate(st.session_state['stored_recommendations'].itertuples(), start=1):
+                        st.write(f"Recipe {display_index} of {len(st.session_state['stored_recommendations'])}")  #sequential numbering
 
-                            # # Format and display the ingredients
-                            # ingredients = row.cleaned_ingredients
-                            # formatted_ingredients = "\n".join(f"- {ingredient}" for ingredient in ingredients)
-                            # st.markdown("**<span style='color:blue;'>Ingredients:</span>**", unsafe_allow_html=True)
-                            # st.markdown(formatted_ingredients)
+                        # Format the recipe details for display for each recipe
+                        format_recipe_details_and_display(row)
 
-                            # # Format and display allergens as a comma-separated list
-                            # allergens = ", ".join(row.allergens)
-                            # st.markdown(f"**<span style='color:blue;'>Allergens:</span>** {allergens}", unsafe_allow_html=True)
+                        st.markdown("<span style='color:red;'>App Limitation: You can only provide feedback for one recipe. Once you click on an option page will be refreshed</span>", unsafe_allow_html=True)
 
-                            # # Instructions
-                            # st.markdown("**<span style='color:blue;'>Instructions:</span>**", unsafe_allow_html=True)
-                            # if row.instructions:
-                            #     formatted_instructions = format_instructions(row.instructions)
-                            #     # Display formatted instructions
-                            #     st.markdown(formatted_instructions)
-                            # else:
-                            #     st.write("Instructions not available.")
-                            #*********************
+                        # display Feedback radio buttons after the recipe details are displayed and feedback selection stored
+                        display_feedback_options_and_store_feedback_on_click(row, user_inputs)
 
-                            # display Feedback radio buttons after the recipe details are displayed and feedback selection stored
-                            display_feedback_radio_button_and_store_feedback(row)
-                            
-                            # ****************
-                            # feedback_key = f"feedback_{row.Index}"
-                            # selected_feedback = st.radio(
-                            #     f"Was this recipe helpful? (Recipe {display_index})",
-                            #     options=["Helpful", "Not Helpful"],
-                            #     index=0,
-                            #     key=f"feedback_{row.Index}"
-                            # )
-                            # # # Update feedback_dict dynamically
-                            # st.session_state['feedback_dict'][row.Index] = selected_feedback
-                            # print(f"Feedback Captured: {row.name} -> {selected_feedback}")
-                            
-                            # print(selected_feedback)
+                    submitted = st.button("find another Recipe")
 
-                            # st.write("---")  # Separator between recipes
-                            # *****************
+                    # print("Form Submitted State:", submitted)
+                    print("Feedback Dict before Interaction:", st.session_state['feedback_dict'])     
 
-                        # Submit all feedback button
-                        print("Session State Values before form submission:", st.session_state)
-                        st.form_submit_button("Submit feedback and/or find another Recipe")
-                        # print("Form Submitted State:", submitted)
-                        print("Feedback Dict Values before submit button is clicked:", st.session_state['feedback_dict'])
-
-                        # if user clicks on "Submit feedback and/or find another Recipe" button
-                        # process feedback and save it in a json file and 
-                        # update the weights of the feedback
-                        # refresh the screen
-                    if st.form_submit_button:
-                        print("Session State Values after form submission:", st.session_state)
-                        print("Form Submitted:", st.form_submit_button)
-                        print("Feedback Dict Values after submit button while processing/saving:", st.session_state['feedback_dict'])
-
-                        # **************
-                        # # Update feedback_dict based on radio button selections
-                        # for row in recommended_recipes.itertuples():
-                        #     feedback_key = f"feedback_{row.Index}"
-                        #     selected_feedback = st.session_state.get(feedback_key, "Select")
-                        #     if selected_feedback != "Select":
-                        #         print(selected_feedback)
-                        #         st.session_state['feedback_dict'][row.Index] = selected_feedback
-
-                        #     print("Updated Feedback Dict:", st.session_state['feedback_dict'])
-                        # *****************
-
-
-                        # if user clicks on "Submit feedback and/or find another Recipe" button
-                        # process feedback and save it in a json file and 
-                        # update the weights of the feedback
-                        # refresh the screen
-                        save_feedback_update_wt_refresh_screen(user_inputs, recommended_recipes, feedback_model)
-
-                        # ****************
-                        # if feedback is not empty then save
-                        # if any(feedback != "Select" for feedback in st.session_state['feedback_dict'].values()):
-                        # print("Saving feedback...")
-                        # save_feedback_update_wt_refresh_screen(user_inputs, recommended_recipes, feedback_model)
-                        # if not st.session_state.get('feedback_dict'):
-                        #     print("No feedback to save.")
-                        #     return
-                            
-                        # feedback_data = {
-                        #     "user_inputs": user_inputs,
-                        #     "feedback": st.session_state['feedback_dict'],
-                        #     "recommendations": recommended_recipes.to_dict(orient="records")
-                        # }
-
-                        # print("Feedback Data to Save:", feedback_data)  # Debugging step
                         
-                        # # File path for the feedback file
-                        # feedback_file_path = "models/user_feedback.json"
-                        # # Ensure the file and directory exist
-                        # os.makedirs(os.path.dirname(feedback_file_path), exist_ok=True)
-                        # try:
-                        #     # Load existing feedback if the file exists
-                        #     print('inside try')
-                        #     with open(feedback_file_path, "r") as f:
-                        #         existing_feedback = json.load(f)
-                        # except FileNotFoundError:
-                        #     print('inside except')
-                        #     # If the file doesn't exist, initialize with an empty list
-                        #     existing_feedback = []
-                        
-                        # print("Existing Feedback Before Append:", existing_feedback)  # Debugging step
-                        
-                        # # Append new feedback data
-                        # existing_feedback.append(feedback_data)
-                        # # Save updated feedback back to the file
-                        # with open(feedback_file_path, "w") as f:
-                        #     print('Save updated feedback back to the file')
-                        #     json.dump(existing_feedback, f, indent=4)
+                    # if user clicks on "find another Recipe" button
+                    if submitted:
+                        # print("Session State Values after form submission:", st.session_state)
+                        # print("Form Submitted:", st.form_submit_button)
+                        print("Feedback Dict After Interaction::", st.session_state['feedback_dict'])
 
-                        # print("Feedback Saved Successfully:", existing_feedback)  # Debugging step
-                        # *******************
+                        # process feedback and save it in a json file and refresh the screen
+                        save_feedback_update_wt_refresh_screen(user_inputs, st.session_state['stored_recommendations'], feedback_model)
 
                         # after the feedback is saved and feedback file is saved with new weights, reset the session
                         reset_session_state()
