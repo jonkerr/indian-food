@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import re
+import concurrent.futures
 from sklearn.decomposition import NMF
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -8,7 +9,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from gensim.corpora import Dictionary
 from gensim.models.coherencemodel import CoherenceModel
-
 
 processed_df = pd.read_pickle("data/processed_recipes.pkl")
 
@@ -186,7 +186,6 @@ def get_recommendations_svd_tfidf(filtered_df):
 def get_recommendations_svd_count(filtered_df):
   return get_recommendations(filtered_df, CountVectorizer(), TruncatedSVD, num_recommendations=5)
 
-
 #Compare recommendation models and choose the one with the highest average of similarity score as the best model 
 def compare_recommendation_models(filtered_df):
     # Define a dictionary to store model functions and names
@@ -196,9 +195,17 @@ def compare_recommendation_models(filtered_df):
     results = []
     all_recommendations = {}
 
-    for model_name, model_func in model_functions.items():
+    results_dct = {}
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # submit multi-threaded job
+        futures = {name: executor.submit(func, filtered_df) for name,func in model_functions.items()}    
+        # collect results from each thread
+        results_dct = {name: t.result() for name, t in futures.items()}
+
+    for model_name, recommended_recipes in results_dct.items():
+#    for model_name, model_func in model_functions.items():
         # Get recommendations using the model
-        recommended_recipes = model_func(filtered_df)
+#        recommended_recipes = model_func(filtered_df)
 
          # Store the recommendations for the current model
         all_recommendations[model_name] = recommended_recipes
