@@ -12,12 +12,6 @@ from scipy.stats import zscore
 IMG_SIZE = (224, 224)  
 RANDOM_STATE = 42
 
-DEBUG = False
-def print_debug(*args, **kwargs):
-    if DEBUG:
-        print(*args, **kwargs)
-        
-
 def save_label_mapping(dict, path="data/pre_processed/mapping.pkl"):
     with open(path, 'wb') as f:
         pickle.dump(dict, f)
@@ -144,12 +138,7 @@ def train_val_test_split(X,y,labels, test_size=0.1, val_size=0.1):
     Split into X_train, y_train, X_test, y_test, X_validate, y_validate
     This is more complex than the standard test/train split as we're trying to split a dataset 3 ways,
       while also ensuring we're stratifying on labels to try to get an even distribution of class items.
-    """    
-    
-    print_debug(f'X shape: {X.shape}')
-    print_debug(f'y shape: {y.shape}')
-    print_debug(f'label shape: {len(labels)}')    
-    
+    """        
     # utility function to abstract common parameters
     def split(X,y,labels, test_size):
         # stratify on each label to ensure we don't introduce a class imbalance.
@@ -179,49 +168,22 @@ def get_split_data(preprocess_input, image_path='data/Food_Classification/', pic
         image_path: where to look for images
         pickle_path: where to save cached results
     
-    """
-    
-    """
-    # ensure path exists
-    if not os.path.exists(pickle_path):
-        os.makedirs(pickle_path)    
-    
-    # get dataframe of labels, paths, and processed images
-    pickle_file_name = f'{model_name}_processed.pkl.xz'
-    cache_path = os.path.join(pickle_path, pickle_file_name)
-    if os.path.exists(cache_path):
-        print_debug('Reading pickle')
-        df = pd.read_pickle(cache_path) 
-    else:
-        print_debug('processing images')
-        # get images as paths
-        df = get_img_df(image_path, pickle_path)
-        df['images'] = process_images_for_CV(df['path'], preprocess_input)
-#        df.to_pickle(cache_path)
-    print_debug('done')
-    df = df.dropna()
-    """
-
+    """    
     df = get_img_df(image_path, pickle_path)
     X, labels = process_images_for_CV(preprocess_input, df['path'], df['label'])
 
     # need to convert output to one-hot encocding for ML
     # keras on-hot encoder (to_categorical) requires that labels be integers first.
     # As such, we need to first use a LabelEncoder        
-    print_debug('to_categorical')
-#    X = df['images']
-    #labels = df['label']
     encoder = LabelEncoder().fit(labels)
     y = to_categorical(encoder.transform(labels))
     
     # ensure we also have a reverse mapping
-    print_debug('reverse_mapping')    
     unique_labels = np.unique(labels) 
     reverse_mapping = {key:val for key,val in zip(encoder.transform(unique_labels), unique_labels)}
     # save for later
     save_label_mapping(reverse_mapping)
 
     # stratified split on label
-    print_debug('train_val_test_split')    
     X_train, y_train, X_test, y_test, X_validate, y_validate = train_val_test_split(X, y, labels, test_size=0.1, val_size=0.1)
     return X_train, y_train, X_test, y_test, X_validate, y_validate, encoder

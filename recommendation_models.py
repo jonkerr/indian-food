@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import re
-import concurrent.futures
 from sklearn.decomposition import NMF
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -104,7 +103,15 @@ def compute_coherence_scores(filtered_df, vectorizer, model, min_topics=2, max_t
     return best_num_topics
 
 #Train the recommendation model using topic models and vectorizers
-def get_recommendations(filtered_df, vectorizer, model, num_recommendations=5):
+def get_recommendations(filtered_df, vectorizer, model, num_recommendations=5): 
+    # Handle the case with only one dish in the filtered DataFrame
+    if len(filtered_df) == 1:
+        filtered_df = filtered_df.copy()
+        filtered_df['similarity_score'] = ["100.00%"]  # Single dish is perfectly similar to itself
+        #print("\nOnly one dish in the filtered DataFrame. Returning it as the recommendation.\n")
+        return filtered_df[['name', 'similarity_score', 'cleaned_ingredients', 'cuisine', 
+                            'course', 'diet', 'allergens', 'prep_time', 'instructions']]
+    
     # Compute the optimal number of topics
     best_num_topics = compute_coherence_scores(filtered_df, vectorizer, model)
 
@@ -195,17 +202,9 @@ def compare_recommendation_models(filtered_df):
     results = []
     all_recommendations = {}
 
-    results_dct = {}
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        # submit multi-threaded job
-        futures = {name: executor.submit(func, filtered_df) for name,func in model_functions.items()}    
-        # collect results from each thread
-        results_dct = {name: t.result() for name, t in futures.items()}
-
-    for model_name, recommended_recipes in results_dct.items():
-#    for model_name, model_func in model_functions.items():
+    for model_name, model_func in model_functions.items():
         # Get recommendations using the model
-#        recommended_recipes = model_func(filtered_df)
+        recommended_recipes = model_func(filtered_df)
 
          # Store the recommendations for the current model
         all_recommendations[model_name] = recommended_recipes
