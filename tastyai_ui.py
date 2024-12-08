@@ -4,7 +4,7 @@ import numpy as np
 import json
 from recommendation_models import filter_recipes
 from feedback_reinf_learn_recommendation_model import FeedbackRecommendationModel
-from save_user_feedback import save_feedback
+# from save_user_feedback import save_feedback
 from ui_functions import (reset_session_state, format_dish_name, initialize_session_state, 
                           image_upload_and_prediction, dish_name_and_selection, 
                         display_optional_parameters, filter_empty_option_and_df, 
