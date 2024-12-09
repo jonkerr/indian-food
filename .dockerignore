@@ -4,9 +4,12 @@
 # allowed python files
 !cv_model.py
 !cv_predict.py
+!feedback_reinf_learn_recommendation_model.py
 !image_prep.py
+!save_load_recommendation_models_vectorizers.py
 !recommendation_models.py
 !tastyai_ui.py
+!ui_functions.py
 
 # allowed data
 !data/Food_Classification/chole_bhature/002.jpg
@@ -15,6 +18,6 @@
 !data/pre_processed/mapping.pkl
 
 # allowed models
-!models/efficientnet_v2_20_84.64.keras 
 !models/weights/efficientnet_v2_20_84.64.hdf5 
-!models/*.pkl
+!models/lite/efficientnet_v2_20_84.64.tflite
+!**/*.pkl
