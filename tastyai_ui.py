@@ -166,6 +166,9 @@ def main():
                 if st.session_state['stored_recommendations'] is not None and not st.session_state['stored_recommendations'].empty:                    
                     st.write(f"Recommended Recipes ({len(st.session_state['stored_recommendations'])} found):")
 
+                    # Instructions for the user for allergen risk     
+                    st.markdown("<span style='color:red;'>Warning: Misidentified ingredients or allergens in a dish may pose serious health risks to people with allergies.</span>", unsafe_allow_html=True)
+
                     # Initialize feedback storage in session state
                     if 'feedback_dict' not in st.session_state:
                         st.session_state['feedback_dict'] = {row.Index: "Select" for row in st.session_state['stored_recommendations'].itertuples()}
