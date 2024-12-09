@@ -8,9 +8,37 @@ import os
 import json
 from cv_predict import TastyFoodPredictor
 
+# **** Overall Summary of this file **** 
+# *****************************************
+# For logic based interaction where logic was needed in UI, it is defined in various functions here
+# Summary of all the functions here:
+# 1) reset_session_state(): to reset session state and all the session state variables
+# 2) initialize_session_state(): to initialize few session variables when page is loaded/reloaded
+# 3) format_dish_name(): Function to format dish names returned by TastyFoodPredictor
+#                                  for on screen display and to pass to the FeedbackModel
+# 4) image_upload_and_prediction(): to display upload image option, clear image and/or 
+#                                   predict dish name, and display predicted name in correct format
+# 5) dish_name_and_selection(): to display dishes name drop down and saves user selected option 
+#                               in the session
+# 6) display_optional_parameters(): to displays all the optional parameters using the options 
+#                                   available in our recipe dataset/processed_df dataframe
+# 7) filter_empty_option_and_df(): to filter processed_df based on user preferences
+# 8) format_instructions(): to clean and format instructions in bulleted format to display on UI
+# 9) format_recipe_details_and_display(): to Format the different parameters for each recipe 
+#                                       for displaying in a readable format on UI
+# 10) on_click_extract_feedback_to_dict(): to extract the user selected feedback and dish name 
+#                                          for which feedback is provided on-click 
+#                                          of the feedback radio button option (yes/no)
+# 11) display_feedback_options_and_store_feedback_on_click(): to display Feedback options at the 
+#                                                        end of each recipe details on the screen                                     
+# 12) save_feedback_update_wt_refresh_screen(): to process feedback and save it in the 
+#                               models/user_feedback.json file and refreshes the screen
+
+# load cleaned dataframe after data processing and modeling is done
 processed_df = pd.read_pickle("data/processed_recipes.pkl")
 
-# Function to reset session state
+# Function to reset session state and all the session state variables when
+# 1) reset is called invoked by click/press of a button
 def reset_session_state():
     """
     Reset all session state variables, including clearing the uploaded image.
@@ -37,6 +65,8 @@ def reset_session_state():
     st.session_state['reset_trigger'] = True  # Set a trigger for resetting widgets
     st.session_state['clear_image_triggered'] = True
 
+# function to initialize few session variables when:
+# 1) the page is loaded/reloaded
 def initialize_session_state():
     if 'predicted_dish_name' not in st.session_state:
         reset_session_state()
@@ -49,7 +79,8 @@ def initialize_session_state():
     if 'selected_recipe' not in st.session_state:
         st.session_state['selected_recipe'] = "Select an option"
 
-# Function to format dish names
+# Function to format dish names returned by TastyFoodPredictor
+# formated t0 display on screen and then to pass to the FeedbackModel for recipe recommendations
 def format_dish_name(dish_name):
     # Remove special characters (replace underscores with spaces)
     predicted_dish_name_for_filter = dish_name.replace("_", " ")
@@ -77,7 +108,6 @@ def image_upload_and_prediction():
                 st.stop()  # Stop further execution
             else:
                 st.session_state['uploaded_image'] = uploaded_image
-                # st.session_state['clear_image_triggered'] = False  # Reset clear trigger
 
     # Display uploaded image if present in session state
     if st.session_state.get('uploaded_image') is not None:
@@ -90,12 +120,10 @@ def image_upload_and_prediction():
             reset_session_state()
             # st.experimental_rerun()
 
-        # Instructions for the button (to manage the bug)
-        st.markdown(
-            "<p style='font-size: small; color: gray;'><em>*Please click this button twice with a 2-second interval to clear the image.*</em></p>",
-            unsafe_allow_html=True
-        )
-
+        # Instructions for the button (to manage the streamlit bug/incompatibility)
+        st.markdown("<p style='font-size: small; color: gray;'><em>*Please click this button twice with a 2-second interval to clear the image.*</em></p>",
+            unsafe_allow_html=True)
+        
         # preidict dish name
         if st.button("Identify Dish Name"):
         # Save the uploaded image as a temporary file
@@ -133,8 +161,8 @@ def dish_name_and_selection():
         key="selected_recipe"
     )
 
-# this function displays all the optional parameters using the options available in our limited recipe dataset (processed_df)
-# all options are single selection, except allergy type which is multi select
+# this function displays all the optional parameters using the options available in our limited recipe 
+# dataset (processed_df). all options are single selection, except allergy type which is multi select
 def display_optional_parameters():
     selected_cuisine = st.selectbox(
         "Select a Cuisine (optional)",
@@ -162,7 +190,10 @@ def display_optional_parameters():
         key="selected_allergies"
     )
 
-#Find dish name in recipes and filter them based on user preferences using filter_recipe() function
+# Function to filter processed_df based on user preferences using filter_recipe() function 
+# and return filtered dataframe
+# since filter_recipe() function expects None as value for the empty options and streamlit is passing 
+# default "Select an option" this sets those variable to none before calling filter_recipe()
 def filter_empty_option_and_df(df, dish_name, cuisine=None, course=None, diet=None, prep_time=None, allergen_type=None, debug=False): 
 
     cuisine = None if cuisine == "Select an option" else cuisine
@@ -175,6 +206,8 @@ def filter_empty_option_and_df(df, dish_name, cuisine=None, course=None, diet=No
 
     return filtered_df
 
+# this functions takes unformatted "instructions" returned from filtered_df and then formats it 
+# in a bulleted instruction to display on UI
 def format_instructions(instructions):
     # Replace all occurrences of "\xa0" with a regular space in the entire text
     instructions = instructions.replace("\xa0", " ")
@@ -192,7 +225,8 @@ def format_instructions(instructions):
 
     return formatted_instructions
 
-# function to Format the recipe name for display for each recipe
+# function to Format the different parameters for each recipe for displaying on UI:
+# name, cuisine, course, diet type, preperation time, ingredients, allergens, amd instructions
 def format_recipe_details_and_display(row):
     formatted_name, _ = format_dish_name(row.name)
     st.markdown(f"### **{formatted_name}**")
@@ -210,14 +244,13 @@ def format_recipe_details_and_display(row):
     st.markdown(formatted_ingredients)
 
     # Format and display allergens as a comma-separated list
-    # allergens = ", ".join(row.allergens)
     if isinstance(row.allergens, str):
         allergens = row.allergens  # If it's a single string, use it as is
     else:
         allergens = ", ".join(row.allergens)  # Otherwise, join the list of allergens
     st.markdown(f"**<span style='color:blue;'>Allergens:</span>** {allergens}", unsafe_allow_html=True)
 
-    # Instructions
+    # to format Instructions calls format_instructions() function
     st.markdown("**<span style='color:blue;'>Instructions:</span>**", unsafe_allow_html=True)
     if row.instructions:
         formatted_instructions = format_instructions(row.instructions)
@@ -226,8 +259,8 @@ def format_recipe_details_and_display(row):
     else:
         st.write("Instructions not available.")
 
-# on-click of the radio button for feedback, extract the user selected dish name
-# which option user selected, and then save it in feedback dictionary
+# to extract the user selected feedback and dish name for which feedback is provided on-click of the 
+# feedback radio button option (yes/no); and then save it in feedback dictionary
 def on_click_extract_feedback_to_dict(row, user_inputs, feedback_model):
     # Identify the feedback key for the current row
     fbIndex = f"fb_{row.Index}"
@@ -249,24 +282,25 @@ def on_click_extract_feedback_to_dict(row, user_inputs, feedback_model):
 
     save_feedback_update_wt_refresh_screen(row, user_inputs, feedback_model)
 
-# # display Feedback options after the recipe details are displayed
+# # display Feedback options at the end of each recipe details on the screen
+# and then on clcik of a feedback button it calls on_click_extract_feedback_to_dict() function
 def display_feedback_options_and_store_feedback_on_click(row, user_inputs, feedback_model):
     feedback_key = f"feedback_{row.Index}"
-
     feedback_options = ["Yes", "No"]
     fbIndex = f"fb_{row.Index}"
     st.session_state[fbIndex] = None
     selected_feedback = st.radio(
         "Is this recipe helpful?",
         feedback_options,
-        index=None,
+        index=None, # this means none of the options yes/no is defaulted on the screen
         key=fbIndex,
         on_change=on_click_extract_feedback_to_dict,
         args=(row, user_inputs, feedback_model)
     )
 
-# if user clicks on "Submit feedback and/or find another Recipe" button
-# process feedback and save it in a json file and refresh the screen
+# This function is called when user clicks on "find another Recipe" button 
+# or selects a feedback radio button option
+# This processes feedback and save it in a models/user_feedback.json file and refreshes the screen
 def save_feedback_update_wt_refresh_screen(row, user_inputs, feedback_model):
     if not st.session_state.get('feedback_dict'):
         st.warning("No feedback to save.")
@@ -276,26 +310,21 @@ def save_feedback_update_wt_refresh_screen(row, user_inputs, feedback_model):
                 st.session_state["stored_recommendations"]["name"].astype(str) + " " +
                 st.session_state["stored_recommendations"]["cleaned_ingredients"].astype(str)
             )
-
         # Access feedback_dict from session state
         feedback_dict = st.session_state["feedback_dict"]
-
         # Filter recommendations based on feedback keys (row indices)
         stored_recommendations = st.session_state.get('stored_recommendations', None)
 
         if stored_recommendations is not None:
             recommendations_df = pd.DataFrame(stored_recommendations)
-
             # Add an index column to ensure correct mapping
             recommendations_df.reset_index(inplace=True)
-
             # Convert feedback indices to dish names
             feedback_with_names = {
                 recommendations_df.loc[idx, "name"]: feedback
                 for idx, feedback in st.session_state["feedback_dict"].items()
                 if idx in recommendations_df.index
             }
-
             # Filter recommendations based on indices present in the feedback_dict
             filtered_recommendations = recommendations_df[recommendations_df['index'].isin(feedback_dict.keys())
                                         ][['name', 'similarity_score']].to_dict(orient="records") 
@@ -306,8 +335,7 @@ def save_feedback_update_wt_refresh_screen(row, user_inputs, feedback_model):
         feedback_data = {
             "user_inputs": user_inputs,
             "feedback": feedback_with_names,
-            "recommendations": filtered_recommendations
-        }
+            "recommendations": filtered_recommendations}
         
         # File path for the feedback file
         feedback_file_path = "models/user_feedback.json"
