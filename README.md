@@ -46,7 +46,6 @@ Here are the modules used to run the application
 |Image Classification|cv_model.py|Define the computer vision model|
 |Image Classification|cv_predict.py|Wrapper class to simplify classification predictions|
 |Image Classification| image_prep.py | Tools for retriving image files and converting to pandas dataframe |
-|Image Classification| image_gen.py | Tools for converting dataframes to keras image generators |
 |Reinforcement Learning|save_user_feedback.py|** TBD **|
 |Reinforcement Learning|feedback_reinf_learn_recommendation_model.py|** TBD **|
 |Web Application|Dockerfile|Define what goes into the docker container|
