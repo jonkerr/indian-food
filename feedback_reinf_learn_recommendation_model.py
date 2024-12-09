@@ -46,15 +46,12 @@ class FeedbackRecommendationModel:
         # Processing relevant feedback 
         for feedback_dict in relevant_feedback:
             for recipe_name, feedback in feedback_dict.items():
-                print(f"Matching Recipe: {recipe_name}, Feedback: {feedback}")
                 recipe_name = recipe_name.strip().lower()  # Standardize for matching
                 if recipe_name in recommendations["name"].str.lower().values:
                     if feedback == "Yes":
                         recommendations.loc[recommendations["name"].str.lower() == recipe_name, "weight_adjustment"] += 1
                     elif feedback == "No":
                         recommendations.loc[recommendations["name"].str.lower() == recipe_name, "weight_adjustment"] -= 1
-
-        print(recommendations)
 
         return recommendations
 
@@ -74,8 +71,6 @@ class FeedbackRecommendationModel:
 
         # Aggregate feedback adjustments and get weights using feedback data
         recommendations = self.aggregate_feedback(recommendations, feedback_data, user_inputs)
-
-        print("Weight aggregated for the feedback Applied:\n", recommendations[["name", "weight_adjustment"]])
 
         # Calculate the final score
         recommendations["final_score"] = recommendations["similarity_score"] * 0.7 + recommendations["weight_adjustment"] * 0.3
@@ -100,6 +95,8 @@ class FeedbackRecommendationModel:
 
         # Step 1: Call compare_recommendation_models to get initial recommendations
         recommendations = compare_recommendation_models(filtered_recipes)
+        
+        print("Recommended Recipes by NLP based recommendation model with Similarity Scores:", recommendations[['name', 'similarity_score']])
 
         # Step 2: If only one recommendation is provided, return it without feedback processing
         if len(recommendations) == 1:
@@ -114,4 +111,7 @@ class FeedbackRecommendationModel:
 
         # Step 4: Update weights based on existing feedback and return recommendations
         recommendations = self.update_weights_with_feedback(recommendations, user_inputs)
+        
+        print("Recommendations with Final weighted Scores after feedback model has been applied:", recommendations[['name', 'final_score']])
+
         return recommendations
