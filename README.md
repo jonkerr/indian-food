@@ -1,8 +1,8 @@
 # Tasty_AI
 ### Description
 1. Use multiclass image classification to identify Indian food dishes
-2. Based on predicted label and other inputs, recommend recipes and similar dishes
-3. Refine recommendations via reinforcement learning
+2. Based on predicted label and other inputs, recommend upto top 5 recipes and similar dishes
+3. Using available feedback refine recommendations via reinforcement learning
 
 ### Setup
 Install environment from conda file
@@ -46,12 +46,11 @@ Here are the modules used to run the application
 |Image Classification|cv_model.py|Define the computer vision model|
 |Image Classification|cv_predict.py|Wrapper class to simplify classification predictions|
 |Image Classification| image_prep.py | Tools for retriving image files and converting to pandas dataframe |
-|Reinforcement Learning|save_user_feedback.py|** TBD **|
-|Reinforcement Learning|feedback_reinf_learn_recommendation_model.py|** TBD **|
+|Reinforcement Learning|feedback_reinf_learn_recommendation_model.py|Class to adjust recipe recommendations ranking using relevant feedback and save feedback in user_feedback.json file|
 |Web Application|Dockerfile|Define what goes into the docker container|
 |Web Application|.dockerignore|Define what *doesn't* goes into the docker container|
-|Web Application|tastyai_ui.py|Streamlit application file.  This file primarily defines the view|
-|Web Application|ui_functions.py|Separation of concerns for streamlit application.  This file contains the logical/controller aspects of the web application.|
+|Web Application|tastyai_ui.py|Streamlit based file to create TastyAI webpage. This primarily defines the view and processes user input by calling relevant functions|
+|Web Application|ui_functions.py|This implements various utility functions to enable the user interaction logic for the TastyAIsystem in the Streamlit UI|
 |Repository Management|.gitignore|Specify files to exclude from adding to git|
 |Environment Management|envrionment.yml|Conda environment file to ensure all packages are available|
 
@@ -71,9 +70,10 @@ In addition to the modules, it can be helpful to have a variety of examples to h
 
 
 ### Working Data
-There are two categories of persisted data: 
+There are three categories of persisted data: 
 * Source Data - this is data that is downloaded from the data sources listed above
 * Model Data - this is data has been constructed and serialized for future use
+* Feedback Data - user feedback data is collected and utilized by Feedback Reinforcement Learning re-ranking
 
 #### Source Data
 | Usage | Path |
@@ -99,5 +99,9 @@ Note: This data may not actually exist as it is too large to check into GitHub. 
 |Recomendation Vectorizer TF-IDF Model|Checked in | models/tfidf_vectorizer.pkl|
 
 
+#### Feedback Data
+This is cleaned user feedback dat generated using our integration testing and demo to demonstrate how it is saved and for new users to test if the reranking is working accurately if the feedback exists. This will be updated with new feedback anytime a user provids a feedback on the screen.
 
-
+| Usage | Status | Path |
+| --- | --- | --- |
+|User Feedback Collection| Checked in and also Generated | models/user_feedback.json|
