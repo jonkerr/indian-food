@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-# import json
-from recommendation_models import filter_recipes
 from feedback_reinf_learn_recommendation_model import FeedbackRecommendationModel
 from ui_functions import (reset_session_state, format_dish_name, initialize_session_state, 
                           image_upload_and_prediction, dish_name_and_selection, 
@@ -11,6 +9,47 @@ from ui_functions import (reset_session_state, format_dish_name, initialize_sess
                         display_feedback_options_and_store_feedback_on_click, 
                         save_feedback_update_wt_refresh_screen
 )
+
+# **** Overall flow of UI/TastyAI **** 
+# This file create streamlit based UI for TastyAI. 
+# For logic based interaction it logic is defined in various functions in UI_functions.py
+# It loads cleaned dataframe from processed_recipes.pkl 
+# displays all the fields and drop down options to the user using relevant data in processed_df
+# calls TastyFoodPredictor for dish name identification when user uploads an image
+# formats the dish name returned by TastyFoodPredictor in a presentable sentence case
+# formats name in lower case to pass to the FeedbackRecommendationModel class to find recommended recipes 
+# FeedbackRecommendationModel first calls NLP based compare_recommendations_model function which returns upto 5 dishes
+# FeedbackRecommendationModel takes those recommended recipes and checks for relevant feedback for these dishes in user_feedback.json located in models folder
+# if a matching recipe is found it aggregates the weight and combines with similarity score for final weighted score
+# and then based on final_score returns re-ranked recipes to the user
+
+# ******* Error Handling ******
+# This UI also manages the error handling for cases where 1) recipe is not found 
+# 2) user clicks find recipe button without selecting a dish name or uploading a picture
+# 3) or uploads a picture but doesnt identify the dish name using "identify dish name" button
+# 4) or an error is passed from compare_recommendations_model. 
+# In all these cases appropriate message is displayed to the user
+# 
+# **** Limitations *****
+# We had to use specific versions of python which was compatible with computer vision model
+# Bacause of that some of the functionality from streamlit did not work. For eg:
+# 1) tried using streamlit feedback_forms so that we can collect feedback for multiple/all displayed recipes at once
+# but the click of the radio button was not recognized. Did not use that. 
+# 2) tried using radio buttons without the forms, and there also radio button selection was not passed
+# *** Used workarond: used on_click functionality within the radio button which was able to pass 
+# which feedback option was passed by user and for which recipe. 
+# but drawback is as soon as user selects an option all the displayed recipes refreshes. 
+# But feedback is saved in ./models/user_feedback.json
+# *** Also displayed a message before radio buttons what happens when the user clicks on that
+# 
+# 3) when "clear image" button is clicked reset_session is called to reset all the session variables and state
+# but it is not working in one step. when user clicks on the button twice, it works.
+# *** used workaround: displayed a message to the user on screen which is not ideal
+# 
+# 4) When "find another recipe" button is clicked at the end of all the recommended recipes, 
+# it clears recommendations but does not clear user selections including uploaded image. 
+# even though reset_session_state() is called to clear everything
+# **** workaround used: displayed a message to the user that this may nor reset all the user selection on the screen
 
 def main():
     # Load DataFrames from pickle files
