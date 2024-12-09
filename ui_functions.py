@@ -87,9 +87,7 @@ def image_upload_and_prediction():
 
         # Clear Image Button
         if st.button("Clear Image"):
-            print("Before reset:", st.session_state)  # Debug print
             reset_session_state()
-            print("After reset:", st.session_state)  # Debug print
             # st.experimental_rerun()
 
         # Instructions for the button (to manage the bug)
@@ -253,8 +251,6 @@ def on_click_extract_feedback_to_dict(row, user_inputs, feedback_model):
 
 # # display Feedback options after the recipe details are displayed
 def display_feedback_options_and_store_feedback_on_click(row, user_inputs, feedback_model):
-    # print(row)
-
     feedback_key = f"feedback_{row.Index}"
 
     feedback_options = ["Yes", "No"]
