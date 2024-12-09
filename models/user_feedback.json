@@ -1,210 +1,35 @@
 [
     {
         "user_inputs": {
-            "dish_name": "Fish Tandoori Recipe",
+            "dish_name": "chapati",
+            "selected_cuisine": "Select an option",
+            "selected_course": "Select an option",
+            "selected_diet_type": "Vegetarian",
+            "selected_prep_time": "Select an option",
+            "selected_allergies": []
+        },
+        "feedback": {},
+        "recommendations": [
+            {
+                "name": "Beet and Avocado Chapati Recipe",
+                "similarity_score": "36.65%"
+            }
+        ]
+    },
+    {
+        "user_inputs": {
+            "dish_name": "kadai paneer",
             "selected_cuisine": "Select an option",
             "selected_course": "Select an option",
             "selected_diet_type": "Select an option",
             "selected_prep_time": "Select an option",
             "selected_allergies": []
         },
-        "feedback": {
-            "1": "Yes"
-        },
+        "feedback": {},
         "recommendations": [
             {
-                "name": "Fish Tandoori Recipe",
+                "name": "Kadai Paneer Recipe - Spiced Cottage Cheese With Green Bell Peppers",
                 "similarity_score": "100.00%"
-            }
-        ]
-    },
-    {
-        "user_inputs": {
-            "dish_name": "samosa",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Select an option",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {
-            "4": "Yes"
-        },
-        "recommendations": [
-            {
-                "name": "Matar Samosa Recipe -Green Pea Samosa",
-                "similarity_score": 0.0
-            }
-        ]
-    },
-    {
-        "user_inputs": {
-            "dish_name": "Fish Tandoori Recipe",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Select an option",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {
-            "0": "Yes"
-        },
-        "recommendations": [
-            {
-                "name": "Fish Tandoori Recipe",
-                "similarity_score": 0.0
-            }
-        ]
-    },
-    {
-        "user_inputs": {
-            "dish_name": "samosa",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Select an option",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {
-            "0": "Yes"
-        },
-        "recommendations": [
-            {
-                "name": "Mini Dal Samosa Curry/Sabzi Recipe",
-                "similarity_score": 0.0
-            }
-        ]
-    },
-    {
-        "user_inputs": {
-            "dish_name": "samosa",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Select an option",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {
-            "0": "No"
-        },
-        "recommendations": [
-            {
-                "name": "Mini Dal Samosa Curry/Sabzi Recipe",
-                "similarity_score": 0.0
-            }
-        ]
-    },
-    {
-        "user_inputs": {
-            "dish_name": "masala dosa",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Select an option",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {
-            "2": "Yes"
-        },
-        "recommendations": [
-            {
-                "name": "Mysore Masala Dosa Made With Ragi Dosa Batter",
-                "similarity_score": 0.0
-            }
-        ]
-    },
-    {
-        "user_inputs": {
-            "dish_name": "Mixed Vegetable Pulao Recipe",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Select an option",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {
-            "1": "Yes"
-        },
-        "recommendations": [
-            {
-                "name": "Mixed Vegetable Pulao Recipe",
-                "similarity_score": 0.0
-            }
-        ]
-    },
-    {
-        "user_inputs": {
-            "dish_name": "Mixed Vegetable Pulao Recipe",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Select an option",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {
-            "1": "Yes"
-        },
-        "recommendations": [
-            {
-                "name": "Mixed Vegetable Pulao Recipe",
-                "similarity_score": 0.0
-            }
-        ]
-    },
-    {
-        "user_inputs": {
-            "dish_name": "Mixed Vegetable Pulao Recipe",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Select an option",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {
-            "1": "Yes"
-        },
-        "recommendations": [
-            {
-                "name": "Mixed Vegetable Pulao Recipe",
-                "similarity_score": 0.0
-            }
-        ]
-    },
-    {
-        "user_inputs": {
-            "dish_name": "Mixed Vegetable Pulao Recipe",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Select an option",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {
-            "3384": "Yes"
-        },
-        "recommendations": [
-            {
-                "name": "Mixed Vegetable Pulao Recipe",
-                "similarity_score": 0.0
-            }
-        ]
-    },
-    {
-        "user_inputs": {
-            "dish_name": "masala dosa",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Select an option",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {
-            "4120": "Yes"
-        },
-        "recommendations": [
-            {
-                "name": "Mysore Masala Dosa Made With Ragi Dosa Batter",
-                "similarity_score": 0.0
             }
         ]
     },
@@ -217,13 +42,106 @@
             "selected_prep_time": "Select an option",
             "selected_allergies": []
         },
-        "feedback": {
-            "5": "Yes"
-        },
+        "feedback": {},
         "recommendations": [
             {
                 "name": "Cabbage And Carrot Thoran Recipe",
                 "similarity_score": "100.00%"
+            }
+        ]
+    },
+    {
+        "user_inputs": {
+            "dish_name": "kaathi rolls",
+            "selected_cuisine": "Select an option",
+            "selected_course": "Select an option",
+            "selected_diet_type": "Select an option",
+            "selected_prep_time": "Select an option",
+            "selected_allergies": []
+        },
+        "feedback": {
+            "Strawberry & Chocolate Rolls Recipe With Vanilla Glaze": "No"
+        },
+        "recommendations": [
+            {
+                "name": "Strawberry & Chocolate Rolls Recipe With Vanilla Glaze",
+                "similarity_score": 1.0
+            }
+        ]
+    },
+    {
+        "user_inputs": {
+            "dish_name": "samosa",
+            "selected_cuisine": "Select an option",
+            "selected_course": "Select an option",
+            "selected_diet_type": "Select an option",
+            "selected_prep_time": "Select an option",
+            "selected_allergies": []
+        },
+        "feedback": {
+            "Punjabi Samosa Recipe - A Spiced Potato Tea Time Snack ": "Yes"
+        },
+        "recommendations": [
+            {
+                "name": "Punjabi Samosa Recipe - A Spiced Potato Tea Time Snack ",
+                "similarity_score": 0.9849
+            }
+        ]
+    },
+    {
+        "user_inputs": {
+            "dish_name": "samosa",
+            "selected_cuisine": "Select an option",
+            "selected_course": "Select an option",
+            "selected_diet_type": "Vegetarian",
+            "selected_prep_time": "Select an option",
+            "selected_allergies": []
+        },
+        "feedback": {
+            "Matar Samosa Recipe -Green Pea Samosa": "Yes"
+        },
+        "recommendations": [
+            {
+                "name": "Matar Samosa Recipe -Green Pea Samosa",
+                "similarity_score": 0.9952
+            }
+        ]
+    },
+    {
+        "user_inputs": {
+            "dish_name": "samosa",
+            "selected_cuisine": "Select an option",
+            "selected_course": "Select an option",
+            "selected_diet_type": "Vegetarian",
+            "selected_prep_time": "Select an option",
+            "selected_allergies": []
+        },
+        "feedback": {
+            "Baked Samosa Pinwheels Recipe": "No"
+        },
+        "recommendations": [
+            {
+                "name": "Baked Samosa Pinwheels Recipe",
+                "similarity_score": 0.9849
+            }
+        ]
+    },
+    {
+        "user_inputs": {
+            "dish_name": "samosa",
+            "selected_cuisine": "Select an option",
+            "selected_course": "Select an option",
+            "selected_diet_type": "Vegetarian",
+            "selected_prep_time": "Select an option",
+            "selected_allergies": []
+        },
+        "feedback": {
+            "Matar Samosa Recipe -Green Pea Samosa": "Yes"
+        },
+        "recommendations": [
+            {
+                "name": "Matar Samosa Recipe -Green Pea Samosa",
+                "similarity_score": 0.9952
             }
         ]
     }
