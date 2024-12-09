@@ -4,7 +4,6 @@
 # allowed python files
 !cv_model.py
 !cv_predict.py
-!image_gen.py
 !image_prep.py
 !recommendation_models.py
 !tastyai_ui.py
