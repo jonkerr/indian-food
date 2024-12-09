@@ -50,7 +50,7 @@ Here are the modules used to run the application
 |Web Application|Dockerfile|Define what goes into the docker container|
 |Web Application|.dockerignore|Define what *doesn't* goes into the docker container|
 |Web Application|tastyai_ui.py|Streamlit based file to create TastyAI webpage. This primarily defines the view and processes user input by calling relevant functions|
-|Web Application|ui_functions.py|This implements various utility functions to enable the user interaction logic for the TastyAIsystem in the Streamlit UI|
+|Web Application|ui_functions.py|This implements various utility functions to enable the user interaction logic for the TastyAI system in the Streamlit UI|
 |Repository Management|.gitignore|Specify files to exclude from adding to git|
 |Environment Management|envrionment.yml|Conda environment file to ensure all packages are available|
 
@@ -100,7 +100,7 @@ Note: This data may not actually exist as it is too large to check into GitHub. 
 
 
 #### Feedback Data
-This is cleaned user feedback dat generated using our integration testing and demo to demonstrate how it is saved and for new users to test if the reranking is working accurately if the feedback exists. This will be updated with new feedback anytime a user provids a feedback on the screen.
+This is cleaned user feedback data generated using our integration testing and demo to demonstrate how feedback is saved. This will be helpful for new users to test if the reranking is working accurately when the feedback exists for that recipe. This will be updated with new feedback anytime a user provids a feedback on the screen. 
 
 | Usage | Status | Path |
 | --- | --- | --- |
