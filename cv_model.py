@@ -3,7 +3,6 @@ Got a fair amount of inspiration for the base approach from:  https://www.kaggle
 but have adapted a number of things to make it easier to alter different aspects 
 """
 from image_prep import get_split_data, get_label_mapping, IMG_SIZE
-from image_gen import train_image_generator
 
 from tensorflow.keras.layers import Flatten, Dense, Dropout, BatchNormalization, Input
 from tensorflow.keras.models import Model
