@@ -1,57 +1,6 @@
 [
     {
         "user_inputs": {
-            "dish_name": "chapati",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Vegetarian",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {},
-        "recommendations": [
-            {
-                "name": "Beet and Avocado Chapati Recipe",
-                "similarity_score": "36.65%"
-            }
-        ]
-    },
-    {
-        "user_inputs": {
-            "dish_name": "kadai paneer",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Select an option",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {},
-        "recommendations": [
-            {
-                "name": "Kadai Paneer Recipe - Spiced Cottage Cheese With Green Bell Peppers",
-                "similarity_score": "100.00%"
-            }
-        ]
-    },
-    {
-        "user_inputs": {
-            "dish_name": "Cabbage And Carrot Thoran Recipe",
-            "selected_cuisine": "Select an option",
-            "selected_course": "Select an option",
-            "selected_diet_type": "Select an option",
-            "selected_prep_time": "Select an option",
-            "selected_allergies": []
-        },
-        "feedback": {},
-        "recommendations": [
-            {
-                "name": "Cabbage And Carrot Thoran Recipe",
-                "similarity_score": "100.00%"
-            }
-        ]
-    },
-    {
-        "user_inputs": {
             "dish_name": "kaathi rolls",
             "selected_cuisine": "Select an option",
             "selected_course": "Select an option",
