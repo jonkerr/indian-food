@@ -93,5 +93,62 @@
                 "similarity_score": 0.9952
             }
         ]
+    },
+    {
+        "user_inputs": {
+            "dish_name": "samosa",
+            "selected_cuisine": "North Indian",
+            "selected_course": "Select an option",
+            "selected_diet_type": "Vegetarian",
+            "selected_prep_time": "Select an option",
+            "selected_allergies": []
+        },
+        "feedback": {
+            "Mini Dal Samosa Curry/Sabzi Recipe": "No"
+        },
+        "recommendations": [
+            {
+                "name": "Mini Dal Samosa Curry/Sabzi Recipe",
+                "similarity_score": 0.8083
+            }
+        ]
+    },
+    {
+        "user_inputs": {
+            "dish_name": "samosa",
+            "selected_cuisine": "North Indian",
+            "selected_course": "Select an option",
+            "selected_diet_type": "Vegetarian",
+            "selected_prep_time": "Select an option",
+            "selected_allergies": []
+        },
+        "feedback": {
+            "Matar Samosa Recipe -Green Pea Samosa": "Yes"
+        },
+        "recommendations": [
+            {
+                "name": "Matar Samosa Recipe -Green Pea Samosa",
+                "similarity_score": 0.9417
+            }
+        ]
+    },
+    {
+        "user_inputs": {
+            "dish_name": "samosa",
+            "selected_cuisine": "North Indian",
+            "selected_course": "Select an option",
+            "selected_diet_type": "Vegetarian",
+            "selected_prep_time": "Select an option",
+            "selected_allergies": []
+        },
+        "feedback": {
+            "Matar Samosa Chaat Recipe - Delicious Evening Tea Time Snack": "No"
+        },
+        "recommendations": [
+            {
+                "name": "Matar Samosa Chaat Recipe - Delicious Evening Tea Time Snack",
+                "similarity_score": 0.8652
+            }
+        ]
     }
 ]
