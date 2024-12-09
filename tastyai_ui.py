@@ -111,9 +111,6 @@ def main():
                 
                 # Ensure the 'combined_name_ingredients' column is present before passing to recommendation models
                 if "combined_name_ingredients" not in filtered_df.columns:
-                    # Debugging to check which columns are available
-                    print("Available Columns in Filtered Recipes:", filtered_df.columns)
-                    
                     # Create the combined_name_ingredients column if missing
                     if "name" in filtered_df.columns and "cleaned_ingredients" in filtered_df.columns:
                         filtered_df["combined_name_ingredients"] = (
@@ -134,8 +131,6 @@ def main():
                     # Initialize feedback storage in session state
                     if 'feedback_dict' not in st.session_state:
                         st.session_state['feedback_dict'] = {row.Index: "Select" for row in st.session_state['stored_recommendations'].itertuples()}
-                        
-                    print("Stored Recommendations in Session State:", st.session_state.get('stored_recommendations'))
 
                     # Iterate over all recommended recipes and display details
                     for display_index, row in enumerate(st.session_state['stored_recommendations'].itertuples(), start=1):
@@ -149,14 +144,11 @@ def main():
                         # display Feedback radio buttons after the recipe details are displayed and feedback selection stored
                         display_feedback_options_and_store_feedback_on_click(row, user_inputs, feedback_model)
 
+                    st.markdown("<span style='color:red;'>Streamlit Limitation: Clicking on Find Another Recipe Button may not refresh previously uploaded image and option. Please use refresh option from the browser.</span>", unsafe_allow_html=True)
                     submitted = st.button("find another Recipe")
                         
                     # if user clicks on "find another Recipe" button
                     if submitted:
-                        # print("Session State Values after form submission:", st.session_state)
-                        # print("Form Submitted:", st.form_submit_button)
-                        print("Feedback Dict After Interaction::", st.session_state['feedback_dict'])
-
                         # process feedback and save it in a json file and refresh the screen
                         save_feedback_update_wt_refresh_screen(user_inputs, st.session_state['stored_recommendations'], feedback_model)
 
