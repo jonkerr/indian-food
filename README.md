@@ -41,8 +41,8 @@ Here are the modules used to run the application
 
 | Application Area | File | Description |
 | --- | --- |--- |
-|Recommendation Engine|recommendation_models.py|** TBD **|
-|Recommendation Engine|save_load_recommendation_models_vectorizers.py|** TBD **|
+|Recommendation Engine|recommendation_models.py|Modular functions used in recommendation system|
+|Recommendation Engine|save_load_recommendation_models_vectorizers.py|save and load models and vectorizers used in recommendation system|
 |Image Classification|cv_model.py|Define the computer vision model|
 |Image Classification|cv_predict.py|Wrapper class to simplify classification predictions|
 |Image Classification| image_prep.py | Tools for retriving image files and converting to pandas dataframe |
@@ -63,10 +63,11 @@ In addition to the modules, it can be helpful to have a variety of examples to h
 | Application Area | File | Description |
 | --- | --- |--- |
 |Image Classification| Example_CV1_Train._Classifier.ipynb | Train and evaluate image classifier model |
-|Recommendation Engine|example_compare_recommendation_models.ipynb|** TBD **|
-|Recommendation Engine|prepare_recommendation_data.ipynb|** TBD **|
-|Recommendation Engine|topic_modeling_NMF.ipynb|** TBD **|
-|Recommendation Engine|topic_modeling_SVD.ipynb|** TBD **|
+|Recommendation Engine|example_compare_recommendation_models.ipynb|test an example to know how the recommendation system works|
+|Recommendation Engine|merge_clean_recipe_data.ipynb|Clean the merged recipe dataset|
+|Recommendation Engine|preprocess_recipe_data.ipynb|preprocess the recipe data|
+|Recommendation Engine|topic_modeling_NMF.ipynb|Train NMF model on TFIDF and count vectorizers using various combination of data|
+|Recommendation Engine|topic_modeling_SVD.ipynb|Train SVD model on TFIDF and count vectorizers using various combination of data|
 
 
 ### Working Data
@@ -78,6 +79,10 @@ There are two categories of persisted data:
 | Usage | Path |
 | --- | --- |
 |Image classifier training data| data/Food_Classification|
+|First recipe dataset | data/Indian_Food_Cuisine.csv|
+|Second recipe dataset | data/Indian_Food_Recipe.csv|
+|Merged and cleaned recipe dataset| data/nohindi_noduplicate_recipes.pkl|
+|Processed recipe dataset | data/processed_recipes.pkl|
 
 
 #### Model Data

@@ -17,30 +17,6 @@ class FeedbackRecommendationModel:
             with open(self.feedback_file, "w") as f:
                 json.dump([], f)
 
-    # #function to update the weight based on user feedback:
-    # def update_weights(self, feedback_dict):
-    #     """
-    #     Update the feedback model by appending the feedback_dict to the feedback file.
-    #     Args:
-    #         feedback_dict (dict): A dictionary containing recipe IDs and their respective feedback 
-    #                             (e.g., {recipe_id: "helpful"}).
-    #     """
-    #     if not feedback_dict:
-    #         print("No feedback to update.")
-    #         return
-
-    #     # Load existing feedback
-    #     existing_feedback = self.load_feedback()
-
-    #     # Append the new feedback
-    #     existing_feedback.append({"feedback": feedback_dict})
-
-    #     # Save the updated feedback back to the file
-    #     with open(self.feedback_file, "w") as f:
-    #         json.dump(existing_feedback, f, indent=4)
-
-    #     print("Updated Feedback Model Successfully.")
-
     # function to load feedback data from the json file "user_feedback.json" under models folder
     def load_feedback(self):
         """Load feedback data from the feedback file."""
@@ -56,22 +32,13 @@ class FeedbackRecommendationModel:
         Aggregate feedback across multiple entries for the same recipe name 
         and match feedback based on user-given optional parameters.
         """
-        # Filter feedback entries that match the current user inputs
+        # Filter feedback entries that match the user inputs
         relevant_feedback = []
-        for feedback_entry in feedback_data:
-            print(feedback_entry)
-            entry_user_inputs = feedback_entry.get("user_inputs", {})
-            print(entry_user_inputs)
-            if all(
-                entry_user_inputs.get(key) == user_inputs.get(key, "").lower()
-                for key in user_inputs.keys()
-                if user_inputs[key] != "Select"
-            ):
-                relevant_feedback.append(feedback_entry["feedback"])
-                print('entry input key', entry_user_inputs.get(key))
-                print('user inpur key', user_inputs.get(key, "").lower())
-
-        print(relevant_feedback)
+        relevant_feedback = [
+            feedback_entry["feedback"]
+            for feedback_entry in feedback_data
+            if feedback_entry["user_inputs"] == user_inputs
+        ]
 
         # Initializing weight adjustment for all recipe IDs/name
         recommendations["weight_adjustment"] = 0
@@ -79,9 +46,8 @@ class FeedbackRecommendationModel:
         # Processing relevant feedback 
         for feedback_dict in relevant_feedback:
             for recipe_name, feedback in feedback_dict.items():
-                print(recipe_name)
+                print(f"Matching Recipe: {recipe_name}, Feedback: {feedback}")
                 recipe_name = recipe_name.strip().lower()  # Standardize for matching
-                print(recipe_name)
                 if recipe_name in recommendations["name"].str.lower().values:
                     if feedback == "Yes":
                         recommendations.loc[recommendations["name"].str.lower() == recipe_name, "weight_adjustment"] += 1
@@ -103,10 +69,8 @@ class FeedbackRecommendationModel:
         if not feedback_data:
             return recommendations
 
-        # Ensure similarity_score is numeric
-        recommendations["similarity_score"] = pd.to_numeric(
-            recommendations["similarity_score"], errors="coerce"
-        ).fillna(0)
+        # Remove % and convert similarity_score to float
+        recommendations["similarity_score"] = recommendations["similarity_score"].str.rstrip("%").astype(float) / 100
 
         # Aggregate feedback adjustments and get weights using feedback data
         recommendations = self.aggregate_feedback(recommendations, feedback_data, user_inputs)
@@ -126,15 +90,16 @@ class FeedbackRecommendationModel:
     # then calls update_weights_with_feedback function which updates the weights of recommended recipes based on user feedback and suggests rerated recipes
     def get_weighted_recommendations(self, filtered_recipes, user_inputs):
         """Generate recommendations using compare_recommendation_models and adjust weights based on feedback."""
+        
+        # Step 0: check combined_name_ingredients column exist in filtered_recipes df to deal with error
+        if "combined_name_ingredients" not in filtered_recipes.columns:
+            filtered_recipes["combined_name_ingredients"] = (
+                filtered_recipes["name"].astype(str) + " " + 
+                filtered_recipes["cleaned_ingredients"].astype(str)
+            )
+
         # Step 1: Call compare_recommendation_models to get initial recommendations
         recommendations = compare_recommendation_models(filtered_recipes)
-
-        # Debug: Print recipe names from recommendations
-        if "name" in recommendations.columns:
-            recipe_names = recommendations["name"].tolist()
-            print("Recommended Recipe Names:", recipe_names)  # Debug print
-        else:
-            print("No 'name' column found in recommendations. Available columns:", recommendations.columns)
 
         # Step 2: If only one recommendation is provided, return it without feedback processing
         if len(recommendations) == 1:

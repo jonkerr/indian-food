@@ -1,19 +1,16 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import json
+# import json
 from recommendation_models import filter_recipes
 from feedback_reinf_learn_recommendation_model import FeedbackRecommendationModel
-# from save_user_feedback import save_feedback
 from ui_functions import (reset_session_state, format_dish_name, initialize_session_state, 
                           image_upload_and_prediction, dish_name_and_selection, 
                         display_optional_parameters, filter_empty_option_and_df, 
-                        # format_instructions,
                         format_recipe_details_and_display, 
                         display_feedback_options_and_store_feedback_on_click, 
                         save_feedback_update_wt_refresh_screen
 )
-
 
 def main():
     # Load DataFrames from pickle files
@@ -50,8 +47,7 @@ def main():
     # Add a label "OR" between the image uploader and the dropdown
     st.markdown("<h3 style='text-align: center;'>OR</h3>", unsafe_allow_html=True)
 
-    # 2. Dish name Selection Dropdown, using dish_name_and_selection() function
-    # function to display dishes name drop down and saves user selected option in the session
+    # 2. function to display dishes name drop down and saves user selected option in the session
     dish_name_and_selection()
 
     # Add a label for optional parameters
@@ -109,10 +105,24 @@ def main():
                 # FeedbackRecommendationModel calls compare_recommendations() functions to get upto top 5 recipes ranked by nmf/svd tfidf/count models
                 # this function then uses user feedback into account to check if there is feedback matching user preferences, 
                 # if yes, then apply average weights of all matching feedback in addition to similarity score calculated by compare_recommendations() 
-                # then use combined score to display final recipes to the user
+                # then use combined score to rerank recommended recipe and then display final recommendations to the user
                 if 'feedback_model' not in st.session_state:
                     st.session_state['feedback_model'] = FeedbackRecommendationModel(processed_df)
                 
+                # Ensure the 'combined_name_ingredients' column is present before passing to recommendation models
+                if "combined_name_ingredients" not in filtered_df.columns:
+                    # Debugging to check which columns are available
+                    print("Available Columns in Filtered Recipes:", filtered_df.columns)
+                    
+                    # Create the combined_name_ingredients column if missing
+                    if "name" in filtered_df.columns and "cleaned_ingredients" in filtered_df.columns:
+                        filtered_df["combined_name_ingredients"] = (
+                            filtered_df["name"] + " " + filtered_df["cleaned_ingredients"].apply(" ".join)
+                        )
+                    else:
+                        # Raise an error if required columns are not available
+                        raise KeyError("Required columns ('name', 'cleaned_ingredients') are missing to create 'combined_name_ingredients'")
+
                 # Initialize the feedback model
                 feedback_model = st.session_state['feedback_model']
                 if 'stored_recommendations' not in st.session_state:
@@ -124,14 +134,7 @@ def main():
                     # Initialize feedback storage in session state
                     if 'feedback_dict' not in st.session_state:
                         st.session_state['feedback_dict'] = {row.Index: "Select" for row in st.session_state['stored_recommendations'].itertuples()}
-                        # print("Initialized Feedback Dict:", st.session_state['feedback_dict'])
-
-                    # VA *** May delete
-                    # def submit_feedback_vars():
-                    #     print("feedback button clicked")
-
-                    # with st.form("feedback_form"):
-
+                        
                     print("Stored Recommendations in Session State:", st.session_state.get('stored_recommendations'))
 
                     # Iterate over all recommended recipes and display details
@@ -144,13 +147,9 @@ def main():
                         st.markdown("<span style='color:red;'>App Limitation: You can only provide feedback for one recipe. Once you click on an option page will be refreshed</span>", unsafe_allow_html=True)
 
                         # display Feedback radio buttons after the recipe details are displayed and feedback selection stored
-                        display_feedback_options_and_store_feedback_on_click(row, user_inputs)
+                        display_feedback_options_and_store_feedback_on_click(row, user_inputs, feedback_model)
 
                     submitted = st.button("find another Recipe")
-
-                    # print("Form Submitted State:", submitted)
-                    print("Feedback Dict before Interaction:", st.session_state['feedback_dict'])     
-
                         
                     # if user clicks on "find another Recipe" button
                     if submitted:
@@ -169,7 +168,6 @@ def main():
                     st.write("No recommendations available.")
 
 if __name__ == '__main__':
-    # Necessary to avoid multiprocessing issues
     import os
     os.environ['PYTHONWARNINGS'] = 'ignore'  # suppress warnings for cleaner output
     main()
