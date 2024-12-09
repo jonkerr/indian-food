@@ -7,8 +7,7 @@ from ui_functions import (reset_session_state, format_dish_name, initialize_sess
                         display_optional_parameters, filter_empty_option_and_df, 
                         format_recipe_details_and_display, 
                         display_feedback_options_and_store_feedback_on_click, 
-                        save_feedback_update_wt_refresh_screen
-)
+                        save_feedback_update_wt_refresh_screen)
 
 # **** Overall flow of UI/TastyAI **** 
 # This file create streamlit based UI for TastyAI. 
@@ -73,7 +72,7 @@ def main():
     st.title("TastyAI: Indian Recipe Recommendation System")
     st.write("Upload an image of a dish or select a dish name from the given list, select Cuisine, select course, select diet type, select preparation time, and select any allergy information for recommendations.")
 
-    # Disclaimer in red font
+    # Disclaimer in red font (to inform user about TastyFoodPredictor limitations)
     st.markdown(
         "<p style='font-size: small; color: blue;'><strong>Disclaimer:</strong> Dish identification may be incorrect because our model is trained only for 20 dishes.</p>",
         unsafe_allow_html=True)
@@ -178,11 +177,13 @@ def main():
                         # Format the recipe details for display for each recipe
                         format_recipe_details_and_display(row)
 
+                        # Instructions for the radio button selection (to manage the streamlit bug)     
                         st.markdown("<span style='color:red;'>App Limitation: You can only provide feedback for one recipe. Once you click on an option page will be refreshed</span>", unsafe_allow_html=True)
 
                         # display Feedback radio buttons after the recipe details are displayed and feedback selection stored
                         display_feedback_options_and_store_feedback_on_click(row, user_inputs, feedback_model)
 
+                    # Instructions for the Submit button click (to manage the streamlit bug) 
                     st.markdown("<span style='color:red;'>Streamlit Limitation: Clicking on Find Another Recipe Button may not refresh previously uploaded image and option. Please use refresh option from the browser.</span>", unsafe_allow_html=True)
                     submitted = st.button("find another Recipe")
                         
