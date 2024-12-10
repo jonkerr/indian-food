@@ -4,7 +4,13 @@
 2. Based on predicted label and other inputs, recommend upto top 5 recipes and similar dishes
 3. Using available feedback refine recommendations via reinforcement learning
 
-### Setup
+### Disclaimer
+All recommendations are for demonstration purposes only and shouldn't be dependeded on for allergies or other dietary constraints.  Please use your best judegment with your own diet.
+
+
+### Conda Setup
+We **strongly** recommend using conda over venv because conda allows us to specify the correct version of Python.  Assuming you're going to take our good guidance, the conda steps are as follows:
+
 Install environment from conda file
 ```
 conda env create -f environment.yml
@@ -14,16 +20,42 @@ Then activate
 ```
 conda activate Tasty_AI
 ```
+Easy peasy.
+
+### venv Setup
+Conda isn't for everyone.. we get it.  However, this path is a bit harder.  Specifically, this won't work for all versions of Python and has only been tested successfully on **Python 3.9.15**.
+
+To confirm you're using the correct version of Python
+```
+python --version
+```
+Anything other than **3.9.15** and we can't guarantee the requirements.txt is going to work.  Your best bet is to ensure you have that version installed on your venv.
+
+Once you have the correct verison of python, it's actually pretty easy.
+
+```
+pip install -r requirements.txt
+pip install -r requirements2.txt
+```
+Why two files?  Well, that's another issue that would have been addressed with the conda route.  In order to use a GPU on a Windows machine, we need to use tensorflow==2.10.0.  Unfortunately, this version isn't compatible with Streamlit 1.40, which we needed to address some Streamlit bugs.  Sequentially running these files is a little hack that gets around this issue.
+
+Also, pip *will* complain about incompatible versions of protobuf.  This is expected and accepted.  You can ignore this warning.
+
+
+#### TL;DR
+This would have been easier with conda.  Just sayin.
+
 
 ## Application
 
-The application is a streamlit application.  To run, execute the following command:
+This is s streamlit application.  To run, execute the following command:
 ```
 streamlit run tastyai_ui.py
 ```
+It should be self explanatory from there.  Click around and have some fun.  
 
 
-### Data Sources
+## Data Sources
 
 **Data Access**
 All external data sources are open datasets, found on Kaggle.

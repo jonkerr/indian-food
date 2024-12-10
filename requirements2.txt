@@ -1,0 +1,4 @@
+# these need to be install after installing requirements.txt
+spacy==3.5.3 
+protobuf==3.20.* 
+streamlit==1.40.1
